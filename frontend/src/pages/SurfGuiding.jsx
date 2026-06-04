@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useBooking } from '../context/BookingContext';
 
 export default function SurfGuiding() {
+  const { openBookingModal } = useBooking();
   return (
     <main>
       {/* Hero Section */}
@@ -61,12 +63,12 @@ export default function SurfGuiding() {
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="font-headline-lg text-headline-lg text-primary">Join the Search</h2>
           <p className="font-body-lg text-body-lg text-on-surface-variant">Ready to discover the hidden gems of the Moroccan coastline? Book your premium surf guiding package today.</p>
-          <Link 
-            to="/contact" 
-            className="inline-block bg-[#E76F51] text-white px-8 py-4 font-label-md text-label-md uppercase tracking-wider rounded-DEFAULT hover:bg-[#d55e42] transition-all shadow-[0_4px_14px_0_rgba(231,111,81,0.25)] hover:shadow-[0_6px_20px_rgba(231,111,81,0.23)] hover:-translate-y-0.5 text-center"
+          <button 
+            onClick={() => openBookingModal('Surf Guiding Package')}
+            className="inline-block bg-[#E76F51] text-white px-8 py-4 font-label-md text-label-md uppercase tracking-wider rounded-DEFAULT hover:bg-[#d55e42] transition-all shadow-[0_4px_14px_0_rgba(231,111,81,0.25)] hover:shadow-[0_6px_20px_rgba(231,111,81,0.23)] hover:-translate-y-0.5 text-center cursor-pointer"
           >
             Book Your Guide
-          </Link>
+          </button>
         </div>
       </section>
     </main>

@@ -47,8 +47,10 @@ class ReservationController extends Controller
     public function bookedDates(): JsonResponse
     {
         $reservations = Reservation::whereIn('status', [
-            Reservation::STATUS_PENDING,
-            Reservation::STATUS_CONFIRMED,
+            'Confirmed',
+            'Confirmé',
+            'Blocked',
+            'Bloqué'
         ])->get();
 
         $bookedDates = [];

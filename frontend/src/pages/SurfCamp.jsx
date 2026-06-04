@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useBooking } from '../context/BookingContext';
 
 export default function SurfCamp() {
+  const { openBookingModal } = useBooking();
   return (
     <main>
       {/* Hero Section */}
@@ -122,12 +124,12 @@ export default function SurfCamp() {
       <section className="py-section-padding px-margin-mobile md:px-margin-desktop bg-surface max-w-container-max mx-auto text-center">
         <h2 className="font-headline-lg text-headline-lg md:text-headline-lg text-headline-lg-mobile text-primary mb-6">Ready for the Waves?</h2>
         <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">Join us at Azul Surf Mirleft for an unforgettable coastal retreat.</p>
-        <Link 
-          to="/contact" 
+        <button 
+          onClick={() => openBookingModal()}
           className="inline-block bg-[#E76F51] hover:bg-[#d46045] text-white font-label-md text-label-md uppercase tracking-wider px-10 py-4 rounded transition-colors duration-300 shadow-md shadow-[#E76F51]/20 hover:shadow-lg hover:-translate-y-0.5 text-center cursor-pointer"
         >
           Reserve Your Stay
-        </Link>
+        </button>
       </section>
     </main>
   );

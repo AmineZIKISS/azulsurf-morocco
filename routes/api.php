@@ -20,6 +20,7 @@ Route::post('/admin/login', [App\Http\Controllers\Api\AdminController::class, 'a
 Route::post('/contact', [App\Http\Controllers\Api\ContactController::class, 'store']);
 Route::post('/reservations', [App\Http\Controllers\Api\ReservationController::class, 'store']);
 Route::get('/reservations/booked-dates', [App\Http\Controllers\Api\ReservationController::class, 'bookedDates']);
+Route::get('/booked-dates', [App\Http\Controllers\Api\ReservationController::class, 'bookedDates']);
 
 Route::get('/packages', [App\Http\Controllers\Api\PackageController::class, 'index']);
 Route::get('/packages/{package:slug}', [App\Http\Controllers\Api\PackageController::class, 'show']);

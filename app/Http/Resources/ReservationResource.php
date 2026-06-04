@@ -24,6 +24,7 @@ class ReservationResource extends JsonResource
             'check_out' => $this->check_out?->toDateString(),
             'message' => $this->message,
             'status' => $this->status,
+            'reservation_code' => $this->reservation_code,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

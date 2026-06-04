@@ -35,11 +35,16 @@ class ReservationController extends Controller
     public function updateStatus(Request $request, Reservation $reservation): JsonResponse
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled,Pending,Confirmed,Cancelled',
+            'status' => 'required|string',
         ]);
 
-        // Normalize status to Title Case (e.g. 'Confirmed') to match DB constraints
-        $normalizedStatus = ucfirst(strtolower($validated['status']));
+        $normalizedStatus = mb_convert_case(trim($validated['status']), MB_CASE_TITLE, "UTF-8");
+        $allowedStatuses = ['Pending', 'Confirmed', 'Cancelled', 'Blocked', 'Confirmé', 'Bloqué', 'En attente', 'Annulé'];
+        if (!in_array($normalizedStatus, $allowedStatuses)) {
+            return response()->json([
+                'message' => 'Le statut fourni est invalide.'
+            ], 422);
+        }
 
         $reservation->update(['status' => $normalizedStatus]);
 

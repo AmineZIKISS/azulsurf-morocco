@@ -54,10 +54,11 @@ class AdminController extends Controller
             'status' => ['required', 'string'],
         ]);
 
-        $status = ucfirst(strtolower($request->status));
-        if (!in_array($status, ['Pending', 'Confirmed', 'Cancelled'])) {
+        $status = mb_convert_case(trim($request->status), MB_CASE_TITLE, "UTF-8");
+        $allowedStatuses = ['Pending', 'Confirmed', 'Cancelled', 'Blocked', 'Confirmé', 'Bloqué', 'En attente', 'Annulé'];
+        if (!in_array($status, $allowedStatuses)) {
             return response()->json([
-                'message' => 'Le statut fourni est invalide (doit être Pending, Confirmed ou Cancelled).'
+                'message' => 'Le statut fourni est invalide (doit être Pending, Confirmed, Cancelled, Blocked, Confirmé ou Bloqué).'
             ], 422);
         }
 
@@ -65,9 +66,9 @@ class AdminController extends Controller
         $reservation->status = $status;
         $reservation->save();
 
-        if ($status === 'Confirmed') {
+        if ($status === 'Confirmed' || $status === 'Confirmé') {
             \Illuminate\Support\Facades\Mail::to($reservation->email)->send(new \App\Mail\ReservationConfirmed($reservation));
-        } elseif ($status === 'Cancelled') {
+        } elseif ($status === 'Cancelled' || $status === 'Annulé') {
             \Illuminate\Support\Facades\Mail::to($reservation->email)->send(new \App\Mail\ReservationCancelled($reservation));
         }
 

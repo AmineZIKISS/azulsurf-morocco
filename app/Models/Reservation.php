@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Reservation extends Model
 {
@@ -35,6 +36,7 @@ class Reservation extends Model
         'check_out',
         'message',
         'status',
+        'reservation_code',
     ];
 
     protected $casts = [
@@ -42,6 +44,17 @@ class Reservation extends Model
         'check_in' => 'date',
         'check_out' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reservation $reservation) {
+            do {
+                $code = 'AZUL-' . strtoupper(Str::random(6));
+            } while (static::where('reservation_code', $code)->exists());
+
+            $reservation->reservation_code = $code;
+        });
+    }
 
     public function package(): BelongsTo
     {

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe } from 'lucide-react';
+import { useBooking } from '../context/BookingContext';
 
 export default function Navbar() {
+  const { openBookingModal } = useBooking();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredPath, setHoveredPath] = useState(null);
@@ -127,27 +129,28 @@ export default function Navbar() {
               <span className="hover:text-primary cursor-pointer opacity-70 hover:opacity-100 transition-all">AR</span>
             </div>
 
-            <Link to="/contact">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-[#E76F51] text-white px-7 py-2.5 rounded-full font-label-md text-[13px] uppercase tracking-widest hover:bg-[#d46247] transition-colors shadow-md shadow-[#E76F51]/20 hover:shadow-lg hover:shadow-[#E76F51]/30 cursor-pointer"
-              >
-                Réserver
-              </motion.button>
-            </Link>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => openBookingModal()}
+              className="bg-[#E76F51] text-white px-7 py-2.5 rounded-full font-label-md text-[13px] uppercase tracking-widest hover:bg-[#d46247] transition-colors shadow-md shadow-[#E76F51]/20 hover:shadow-lg hover:shadow-[#E76F51]/30 cursor-pointer"
+            >
+              Réserver
+            </motion.button>
           </div>
 
           {/* Mobile Actions: Menu toggle */}
           <div className="flex lg:hidden items-center gap-4">
-            <Link to="/contact">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                className="bg-[#E76F51] text-white px-5 py-2 rounded-full font-label-md text-xs uppercase tracking-widest hover:bg-[#d46247] shadow-sm cursor-pointer"
-              >
-                Réserver
-              </motion.button>
-            </Link>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                openBookingModal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="bg-[#E76F51] text-white px-5 py-2 rounded-full font-label-md text-xs uppercase tracking-widest hover:bg-[#d46247] shadow-sm cursor-pointer"
+            >
+              Réserver
+            </motion.button>
 
             <button 
               onClick={() => setIsMobileMenuOpen(true)}

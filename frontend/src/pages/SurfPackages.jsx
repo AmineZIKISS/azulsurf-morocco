@@ -1,7 +1,120 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useBooking } from '../context/BookingContext';
+
+const packages = [
+  {
+    id: 1,
+    category: "Cours",
+    name: "Surf Lessons Only",
+    service_type: "surf_lesson",
+    description: "Parfait pour apprendre ou se perfectionner à la séance.",
+    price: "À partir de 35€",
+    features: [
+      { text: "1 Session (35€)", included: true },
+      { text: "Session privée (45€)", included: true },
+      { text: "Surf guiding (50€)", included: true },
+      { text: "Promo 2 sessions/jour (50€)", included: true }
+    ],
+    popular: false
+  },
+  {
+    id: 2,
+    category: "Hébergement",
+    name: "Chambre Privée (Hébergement Seul)",
+    service_type: "room",
+    description: "Votre espace privé au calme face à l'océan.",
+    price: "30€ / jour",
+    features: [
+      { text: "Chambre privée (2 lits)", included: true },
+      { text: "Petit-déjeuner inclus", included: true },
+      { text: "Aucune activité incluse", included: false }
+    ],
+    popular: false
+  },
+  {
+    id: 3,
+    category: "Hébergement",
+    name: "Chambre Partagée (Hébergement Seul)",
+    service_type: "room",
+    description: "Ambiance conviviale et reposante à petit prix.",
+    price: "20€ / jour",
+    features: [
+      { text: "Lit en dortoir", included: true },
+      { text: "Petit-déjeuner inclus", included: true },
+      { text: "Aucune activité incluse", included: false }
+    ],
+    popular: false
+  },
+  {
+    id: 4,
+    category: "Séjour",
+    name: "Free Surf Stay",
+    service_type: "package",
+    description: "Liberté totale pour surfer à votre propre rythme.",
+    price: "449€",
+    features: [
+      { text: "7 Nuits / 6 Jours", included: true },
+      { text: "Demi-pension", included: true },
+      { text: "Transfert Aéroport Agadir", included: true },
+      { text: "Matériel de surf inclus", included: true },
+      { text: "Pas de cours de surf", included: false }
+    ],
+    popular: false
+  },
+  {
+    id: 5,
+    category: "Séjour",
+    name: "Surf Package (Sans Transfert)",
+    service_type: "package",
+    description: "L'essentiel de l'expérience surf sans le transport.",
+    price: "589€",
+    features: [
+      { text: "7 Nuits / 6 Jours", included: true },
+      { text: "Demi-pension", included: true },
+      { text: "2 Sessions de surf/jour avec moniteur", included: true },
+      { text: "Matériel inclus", included: true },
+      { text: "Excursions & BBQ", included: true }
+    ],
+    popular: false
+  },
+  {
+    id: 6,
+    category: "Séjour",
+    name: "Surf Guiding Package",
+    service_type: "guiding",
+    description: "Pour les surfeurs autonomes à la recherche des meilleurs spots.",
+    price: "689€",
+    features: [
+      { text: "7 Nuits / 6 Jours", included: true },
+      { text: "Demi-pension", included: true },
+      { text: "2 Sessions de guiding/jour", included: true },
+      { text: "Guides professionnels", included: true },
+      { text: "Transfert Aéroport Agadir", included: true }
+    ],
+    popular: false
+  },
+  {
+    id: 7,
+    category: "Séjour",
+    name: "Full Surf Package",
+    service_type: "package",
+    description: "L'expérience tout-inclus ultime pour un séjour sans soucis.",
+    price: "689€",
+    features: [
+      { text: "7 Nuits / 6 Jours", included: true },
+      { text: "Demi-pension", included: true },
+      { text: "2 Sessions de surf/jour avec moniteur", included: true },
+      { text: "Transfert Aéroport Agadir", included: true },
+      { text: "Excursions & BBQ", included: true }
+    ],
+    popular: true
+  }
+];
 
 export default function SurfPackages() {
+  const navigate = useNavigate();
+  const { openBookingModal } = useBooking();
   return (
     <main>
       {/* Hero Section */}
@@ -24,107 +137,56 @@ export default function SurfPackages() {
 
       {/* Packages Grid */}
       <section className="py-section-padding px-margin-desktop max-w-container-max mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-          {/* Surf School */}
-          <div className="bg-surface-container-lowest p-10 flex flex-col h-full shadow-[0px_10px_30px_rgba(0,95,115,0.03)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0px_20px_40px_rgba(0,95,115,0.05)] rounded-lg">
-            <span className="font-label-md text-label-md text-primary-container mb-4 uppercase tracking-widest">Foundation</span>
-            <h3 className="font-headline-lg text-headline-lg mb-2 text-primary">Surf School</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-6">Ideal for those starting their journey or refining basics with expert guidance.</p>
-            <div className="text-primary-container font-headline-md text-headline-md mb-8">From 720€ / week</div>
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">ISA-Certified Coaching</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Premium Equipment Hire</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Daily Theory &amp; Feedback</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Ocean Safety Training</span>
-              </li>
-            </ul>
-            <Link 
-              to="/contact" 
-              className="w-full py-4 font-label-md text-label-md uppercase tracking-widest transition-colors duration-300 hover:opacity-90 bg-[#E76F51] text-white text-center rounded-sm"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {packages.map((item) => (
+            <div 
+              key={item.id} 
+              className={
+                item.popular 
+                  ? "relative bg-surface-container-lowest p-10 flex flex-col h-full shadow-[0px_15px_40px_rgba(0,95,115,0.06)] border-t-4 border-primary transition-all duration-300 hover:-translate-y-2 rounded-lg"
+                  : "bg-surface-container-lowest p-10 flex flex-col h-full shadow-[0px_10px_30px_rgba(0,95,115,0.03)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0px_20px_40px_rgba(0,95,115,0.05)] rounded-lg"
+              }
             >
-              Réserver
-            </Link>
-          </div>
-
-          {/* Surf Camp (All-Inclusive) */}
-          <div className="relative bg-surface-container-lowest p-10 flex flex-col h-full shadow-[0px_15px_40px_rgba(0,95,115,0.06)] border-t-4 border-primary transition-all duration-300 hover:-translate-y-2 rounded-lg">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 font-label-md text-[10px] uppercase tracking-[0.2em]">Most Popular</div>
-            <span className="font-label-md text-label-md text-primary-container mb-4 uppercase tracking-widest">The Experience</span>
-            <h3 className="font-headline-lg text-headline-lg mb-2 text-primary">Surf Camp (All-Inclusive)</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-6">Our signature retreat combining elite surf coaching with holistic wellness.</p>
-            <div className="text-primary-container font-headline-md text-headline-md mb-8">From 850€ / week</div>
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md font-bold text-on-surface">Luxury Villa Accommodation</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Organic Moroccan Full Board</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Twice Daily Surf Sessions</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Sunset Yoga &amp; Meditiation</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Airport Transfers Included</span>
-              </li>
-            </ul>
-            <Link 
-              to="/contact" 
-              className="w-full py-4 font-label-md text-label-md uppercase tracking-widest transition-colors duration-300 hover:opacity-90 bg-[#E76F51] text-white text-center rounded-sm"
-            >
-              Réserver
-            </Link>
-          </div>
-
-          {/* Surf Guiding */}
-          <div className="bg-surface-container-lowest p-10 flex flex-col h-full shadow-[0px_10px_30px_rgba(0,95,115,0.03)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0px_20px_40px_rgba(0,95,115,0.05)] rounded-lg">
-            <span className="font-label-md text-label-md text-primary-container mb-4 uppercase tracking-widest">Discovery</span>
-            <h3 className="font-headline-lg text-headline-lg mb-2 text-primary">Surf Guiding</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-6">For seasoned riders seeking the coast's hidden gems and secret breaks.</p>
-            <div className="text-primary-container font-headline-md text-headline-md mb-8">From 780€ / week</div>
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Local Secret Spot Access</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">4x4 Coastal Transport</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Daily Forecast Analysis</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>check_circle</span>
-                <span className="font-body-md text-body-md">Small Group Intimacy</span>
-              </li>
-            </ul>
-            <Link 
-              to="/contact" 
-              className="w-full py-4 font-label-md text-label-md uppercase tracking-widest transition-colors duration-300 hover:opacity-90 bg-[#E76F51] text-white text-center rounded-sm"
-            >
-              Réserver
-            </Link>
-          </div>
+              {item.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 font-label-md text-[10px] uppercase tracking-[0.2em]">
+                  Plus Populaire
+                </div>
+              )}
+              <span className="font-label-md text-label-md text-primary-container mb-4 uppercase tracking-widest">
+                {item.category}
+              </span>
+              <h3 className="font-headline-lg text-headline-lg mb-2 text-primary">
+                {item.name}
+              </h3>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6">
+                {item.description}
+              </p>
+              <div className="text-primary-container font-headline-md text-headline-md mb-8">
+                {item.price}
+              </div>
+              <ul className="space-y-4 mb-10 flex-grow">
+                {item.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span 
+                      className={`material-symbols-outlined ${feature.included ? 'text-primary' : 'text-slate-400'}`} 
+                      style={{ fontSize: '20px' }}
+                    >
+                      {feature.included ? 'check_circle' : 'cancel'}
+                    </span>
+                    <span className={`font-body-md text-body-md ${!feature.included ? 'text-on-surface-variant/60 line-through' : ''}`}>
+                      {feature.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={() => openBookingModal(item.name)}
+                className="w-full py-4 font-label-md text-label-md uppercase tracking-widest transition-colors duration-300 hover:opacity-90 bg-[#E76F51] text-white text-center rounded-sm cursor-pointer"
+              >
+                Réserver
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 

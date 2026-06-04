@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useBooking } from '../context/BookingContext';
 
 export default function SurfSchool() {
+  const { openBookingModal } = useBooking();
   return (
     <main>
       {/* Hero Section */}
@@ -21,12 +23,12 @@ export default function SurfSchool() {
             <p className="font-body-lg text-body-lg text-white/90 mb-10 max-w-lg">
               Master the Atlantic swell with our ISA-certified coaches. Experience the perfect balance of Moroccan tradition and world-class surf instruction in the warm waters of Mirleft.
             </p>
-            <Link 
-              to="/contact" 
+            <button 
+              onClick={() => openBookingModal('Surf Lessons Only')}
               className="inline-block bg-[#E76F51] text-white px-10 py-4 font-label-md text-label-md uppercase tracking-widest shadow-xl hover:bg-[#d65d41] transition-all transform hover:scale-105 text-center cursor-pointer"
             >
               Start Your Journey
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -282,12 +284,12 @@ export default function SurfSchool() {
             Spaces are limited for our small-group sessions. Book your professional surf experience in Mirleft today.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link 
-              to="/contact" 
+            <button 
+              onClick={() => openBookingModal('Surf Lessons Only')}
               className="inline-block bg-[#E76F51] text-white px-12 py-5 font-label-md text-label-md uppercase tracking-[0.2em] shadow-2xl hover:bg-[#d65d41] transition-all transform hover:scale-105 text-center cursor-pointer"
             >
               Book Your Lesson
-            </Link>
+            </button>
             <Link 
               to="/surf-packages" 
               className="inline-block border border-white text-white px-12 py-5 font-label-md text-label-md uppercase tracking-[0.2em] hover:bg-white hover:text-primary transition-all text-center cursor-pointer"

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, AlertCircle, Loader2, ChevronDown } from 'lucide-react';
+import { X, CheckCircle2, AlertCircle, Loader2, ChevronDown, Calendar } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import { format, parseISO, startOfDay } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
+import '../styles/datepicker-coastal.css';
 import api from '../services/api';
+import { useBooking } from '../context/BookingContext';
 
 // Reusable Premium Floating Label Input Component
 const FloatingInput = ({ label, id, name, type = 'text', value, onChange, required, disabled, error }) => {
@@ -82,33 +88,86 @@ const FloatingTextarea = ({ label, id, name, value, onChange, disabled, rows = 3
   );
 };
 
-export default function BookingModal({ isOpen, onClose, initialData }) {
+// ── Custom trigger button for the DatePicker (matches Hero style) ─────────────
+const ModalDateInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+  <button
+    type="button"
+    onClick={onClick}
+    ref={ref}
+    className="w-full bg-white/40 border border-outline-variant/30 rounded-xl py-3 px-4 text-sm text-left font-medium text-slate-800 outline-hidden transition-all duration-200 focus:border-[#E76F51] focus:bg-white focus:ring-2 focus:ring-[#E76F51]/10 cursor-pointer"
+  >
+    {value || <span className="text-slate-400 font-normal italic" style={{ fontSize: '0.8125rem' }}>{placeholder}</span>}
+  </button>
+));
+ModalDateInput.displayName = 'ModalDateInput';
+
+// ── Compact Calendar Legend container for the modal context ───────────────────
+const ModalCalendarLegend = ({ className, children }) => (
+  <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(10,63,92,0.12)] overflow-hidden">
+    <div className="p-5">
+      <div className={className} style={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}>
+        {children}
+      </div>
+    </div>
+    <div className="border-t border-slate-100 px-5 py-3 bg-slate-50/60 flex items-center justify-center gap-6">
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#F07167] shadow-[0_0_6px_rgba(240,113,103,0.4)] shrink-0" />
+        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">Sélectionné</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full border-2 border-[#0A3F5C] bg-transparent shrink-0" />
+        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">Aujourd'hui</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300 shrink-0" />
+        <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider line-through">Réservé</span>
+      </div>
+    </div>
+  </div>
+);
+
+export default function BookingModal() {
+  const { isBookingModalOpen: isOpen, closeBookingModal: onClose, selectedService, initialData } = useBooking();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    service_type: 'room',
+    selectedPackage: '',
     additionalMessage: '',
   });
+
+  // ── Local date state as Date objects (for react-datepicker) ────────────
+  const [localCheckIn, setLocalCheckIn] = useState(null);
+  const [localCheckOut, setLocalCheckOut] = useState(null);
+
+  // ── Booked dates from backend ─────────────────────────────────────────
+  const [bookedDates, setBookedDates] = useState([]);
+  const [datesLoading, setDatesLoading] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState({});
   const [selectOpen, setSelectOpen] = useState(false);
+  const [isCheckInOpen, setIsCheckInOpen] = useState(false);
+  const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
 
-  const services = [
-    { value: 'room', label: 'Hébergement Surf Camp (Chambre)' },
-    { value: 'package', label: 'Package Tout-Inclus' },
-    { value: 'surf_lesson', label: 'Cours de Surf (École)' },
-    { value: 'guiding', label: 'Guidage / Surf Guiding' },
+  // ── 7 packages matching the business model in SurfPackages.jsx ──────────
+  const packages = [
+    { value: 'Surf Lessons Only',                      label: 'Surf Lessons Only',                      service_type: 'surf_lesson' },
+    { value: 'Chambre Privée (Hébergement Seul)',       label: 'Chambre Privée (Hébergement Seul)',       service_type: 'room' },
+    { value: 'Chambre Partagée (Hébergement Seul)',     label: 'Chambre Partagée (Hébergement Seul)',     service_type: 'room' },
+    { value: 'Free Surf Stay',                         label: 'Free Surf Stay',                         service_type: 'package' },
+    { value: 'Surf Package (Sans Transfert)',           label: 'Surf Package (Sans Transfert)',           service_type: 'package' },
+    { value: 'Surf Guiding Package',                   label: 'Surf Guiding Package',                   service_type: 'guiding' },
+    { value: 'Full Surf Package',                      label: 'Full Surf Package',                      service_type: 'package' },
   ];
 
-  // Format dates to friendly French
-  const formatDateFrench = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
+  // Format dates to friendly French (accepts Date objects or ISO strings)
+  const formatDateFrench = (dateVal) => {
+    if (!dateVal) return '';
+    const date = dateVal instanceof Date ? dateVal : new Date(dateVal);
+    if (isNaN(date.getTime())) return String(dateVal);
     return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
@@ -116,22 +175,49 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
     });
   };
 
-  // Reset state on open/close
+  // Helper: parse an ISO string like "2026-06-15" into a Date object
+  const parseDateStr = (str) => {
+    if (!str) return null;
+    const d = new Date(str + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : startOfDay(d);
+  };
+
+  // Reset state on open/close, and pre-fill from incoming initialData
   useEffect(() => {
     if (isOpen) {
       setSuccess(false);
       setError('');
       setErrors({});
       setSelectOpen(false);
+      setIsCheckInOpen(false);
+      setIsCheckOutOpen(false);
+
+      // If a package_name was passed (from a SurfPackages card), auto-select it in the dropdown
+      const incomingPackage = initialData?.package_name || '';
+
+      // Initialize local dates from hero booking form (may be null when coming from SurfPackages)
+      setLocalCheckIn(parseDateStr(initialData?.checkIn));
+      setLocalCheckOut(parseDateStr(initialData?.checkOut));
+
       setFormData({
         name: '',
         email: '',
         phone: '',
-        service_type: 'room',
+        selectedPackage: incomingPackage,
         additionalMessage: '',
       });
+
+      // Fetch booked dates from backend
+      setDatesLoading(true);
+      api.get('/booked-dates')
+        .then(res => {
+          const dates = (res.data.booked_dates || []).map(d => startOfDay(parseISO(d)));
+          setBookedDates(dates);
+        })
+        .catch(err => console.warn('Could not load booked dates in modal:', err))
+        .finally(() => setDatesLoading(false));
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -155,16 +241,25 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
       }
     }
 
-    // Build the payload mapping
+    // Resolve backend service_type from the selected package name
+    const selectedPkg = packages.find(p => p.value === formData.selectedPackage);
+    const resolvedServiceType = selectedPkg?.service_type || 'room';
+
+    // Serialize Date objects to ISO strings for the API
+    const toISODate = (d) => d ? format(d, 'yyyy-MM-dd') : '';
+
+    // Build the payload mapping — use local dates (editable in modal)
     const payload = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      service_type: formData.service_type,
+      service_type: resolvedServiceType,
       number_of_people: guestsCount,
-      check_in: initialData?.checkIn || new Date().toISOString().split('T')[0],
-      check_out: initialData?.checkOut || new Date().toISOString().split('T')[0],
-      message: formData.additionalMessage.trim(),
+      check_in: toISODate(localCheckIn),
+      check_out: toISODate(localCheckOut),
+      message: formData.selectedPackage
+        ? `Pack : ${formData.selectedPackage}${formData.additionalMessage.trim() ? ' — ' + formData.additionalMessage.trim() : ''}`
+        : formData.additionalMessage.trim(),
     };
 
     try {
@@ -206,7 +301,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="bg-[#FDFBF7]/95 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-8 max-w-lg w-full relative z-10 overflow-visible"
+            className="bg-[#FDFBF7]/95 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-8 max-w-lg w-full relative z-10 overflow-visible max-h-[90vh] overflow-y-auto"
           >
             {success ? (
               /* Success View */
@@ -225,9 +320,9 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                   transition={{ delay: 0.2 }}
                   className="space-y-3"
                 >
-                  <h3 className="font-headline-md text-2xl text-primary font-bold">Réservation Confirmée !</h3>
-                  <p className="text-on-surface-variant/80 text-sm max-w-xs mx-auto leading-relaxed">
-                    Votre demande a bien été reçue. Notre équipe vous contactera par e-mail ou par téléphone sous 24 heures pour finaliser votre séjour.
+                  <h3 className="font-headline-md text-2xl text-primary font-bold">Demande Envoyée !</h3>
+                  <p className="text-on-surface-variant/80 text-sm max-w-md mx-auto leading-relaxed">
+                    Votre demande a été envoyée avec succès. Notre équipe vous contactera très prochainement par téléphone ou e-mail pour finaliser et confirmer votre réservation.
                   </p>
                 </motion.div>
               </div>
@@ -238,11 +333,11 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                 <div className="flex justify-between items-start border-b border-outline-variant/30 pb-4">
                   <div>
                     <h3 className="font-headline-md text-xl text-primary font-bold">Finaliser la Demande</h3>
-                    {initialData && (
-                      <p className="text-xs text-on-surface-variant/85 mt-1 font-semibold">
-                        Séjour du {formatDateFrench(initialData.checkIn)} au {formatDateFrench(initialData.checkOut)} • {initialData.guests}
-                      </p>
-                    )}
+                    <p className="text-xs text-on-surface-variant/85 mt-1 font-semibold">
+                      {localCheckIn && localCheckOut
+                        ? <>Séjour du {formatDateFrench(localCheckIn)} au {formatDateFrench(localCheckOut)}{initialData?.guests ? ` • ${initialData.guests}` : ''}</>
+                        : <>Veuillez sélectionner vos dates ci-dessous{initialData?.guests ? ` • ${initialData.guests}` : ''}</>}
+                    </p>
                   </div>
                   <button
                     onClick={() => onClose(false)}
@@ -267,6 +362,144 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
 
                 {/* Form fields */}
                 <form onSubmit={handleSubmit} className="space-y-5">
+
+                  {/* ── Custom Calendar Date Selectors ─────────────────── */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Check-in */}
+                    <div className="relative w-full">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Calendar size={11} strokeWidth={2.5} className="text-[#E76F51]" />
+                        <label className="text-[10px] font-bold text-[#E76F51] uppercase tracking-wider">
+                          Date d'arrivée
+                        </label>
+                        {datesLoading && (
+                          <span className="ml-auto flex items-center gap-1 text-[8px] font-semibold text-slate-400 uppercase tracking-wider">
+                            <span className="w-1 h-1 rounded-full bg-[#E76F51] animate-pulse" />
+                            Chargement
+                          </span>
+                        )}
+                      </div>
+                      
+                      <ModalDateInput
+                        value={formatDateFrench(localCheckIn)}
+                        onClick={() => {
+                          if (!loading) {
+                            setIsCheckInOpen(!isCheckInOpen);
+                            setIsCheckOutOpen(false);
+                            setSelectOpen(false);
+                          }
+                        }}
+                        placeholder="Choisir une date"
+                      />
+
+                      <AnimatePresence>
+                        {isCheckInOpen && (
+                          <>
+                            {/* Backdrop click-outside helper */}
+                            <div className="fixed inset-0 z-[50]" onClick={() => setIsCheckInOpen(false)} />
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute z-[60] mt-2 left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 top-full max-w-[90vw]"
+                            >
+                              <DatePicker
+                                selected={localCheckIn}
+                                onChange={(date) => {
+                                  setLocalCheckIn(date);
+                                  setIsCheckInOpen(false);
+                                  // Auto-clear checkout if it's now before or equal to the new checkin
+                                  if (localCheckOut && date && localCheckOut <= date) {
+                                    setLocalCheckOut(null);
+                                  }
+                                  if (errors.check_in) setErrors({ ...errors, check_in: null });
+                                }}
+                                excludeDates={bookedDates}
+                                minDate={startOfDay(new Date())}
+                                inline
+                                locale={fr}
+                                calendarClassName="azul-dp-popper"
+                                calendarContainer={ModalCalendarLegend}
+                              />
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+
+                      {errors.check_in && (
+                        <p className="text-xs text-rose-500 mt-1 font-medium flex items-center gap-1.5 pl-1">
+                          <AlertCircle size={12} className="shrink-0 text-rose-500" />
+                          <span>{errors.check_in[0] || errors.check_in}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Check-out */}
+                    <div className="relative w-full">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Calendar size={11} strokeWidth={2.5} className="text-[#E76F51]" />
+                        <label className="text-[10px] font-bold text-[#E76F51] uppercase tracking-wider">
+                          Date de départ
+                        </label>
+                      </div>
+
+                      <ModalDateInput
+                        value={formatDateFrench(localCheckOut)}
+                        onClick={() => {
+                          if (!loading) {
+                            setIsCheckOutOpen(!isCheckOutOpen);
+                            setIsCheckInOpen(false);
+                            setSelectOpen(false);
+                          }
+                        }}
+                        placeholder="Choisir une date"
+                      />
+
+                      <AnimatePresence>
+                        {isCheckOutOpen && (
+                          <>
+                            {/* Backdrop click-outside helper */}
+                            <div className="fixed inset-0 z-[50]" onClick={() => setIsCheckOutOpen(false)} />
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute z-[60] mt-2 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-full max-w-[90vw]"
+                            >
+                              <DatePicker
+                                selected={localCheckOut}
+                                onChange={(date) => {
+                                  setLocalCheckOut(date);
+                                  setIsCheckOutOpen(false);
+                                  if (errors.check_out) setErrors({ ...errors, check_out: null });
+                                }}
+                                excludeDates={bookedDates}
+                                minDate={
+                                  localCheckIn
+                                    ? new Date(localCheckIn.getTime() + 86_400_000)
+                                    : startOfDay(new Date())
+                                }
+                                inline
+                                locale={fr}
+                                calendarClassName="azul-dp-popper"
+                                calendarContainer={ModalCalendarLegend}
+                              />
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+
+                      {errors.check_out && (
+                        <p className="text-xs text-rose-500 mt-1 font-medium flex items-center gap-1.5 pl-1">
+                          <AlertCircle size={12} className="shrink-0 text-rose-500" />
+                          <span>{errors.check_out[0] || errors.check_out}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   <FloatingInput
                     label="Nom Complet"
                     id="booking_name"
@@ -311,12 +544,18 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                     <div className="relative">
                       <button
                         type="button"
-                        onClick={() => !loading && setSelectOpen(!selectOpen)}
+                        onClick={() => {
+                          if (!loading) {
+                            setSelectOpen(!selectOpen);
+                            setIsCheckInOpen(false);
+                            setIsCheckOutOpen(false);
+                          }
+                        }}
                         disabled={loading}
                         className="w-full bg-white/40 border border-outline-variant/30 rounded-xl py-3.5 px-4 text-sm text-left font-medium text-slate-800 outline-hidden transition-all duration-200 focus:border-[#E76F51] focus:bg-white focus:ring-2 focus:ring-[#E76F51]/10 flex items-center justify-between cursor-pointer"
                       >
                         <span>
-                          {services.find(s => s.value === formData.service_type)?.label || 'Choisir un service'}
+                          {packages.find(p => p.value === formData.selectedPackage)?.label || 'Choisir un pack'}
                         </span>
                         <motion.div
                           animate={{ rotate: selectOpen ? 180 : 0 }}
@@ -339,24 +578,24 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                               transition={{ duration: 0.15 }}
                               className="absolute z-40 w-full mt-2 bg-[#FDFBF7] border border-outline-variant/30 rounded-xl shadow-xl max-h-60 overflow-y-auto overflow-hidden divide-y divide-slate-100"
                             >
-                              {services.map((service) => (
-                                <li key={service.value}>
+                              {packages.map((pkg) => (
+                                <li key={pkg.value}>
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      setFormData({ ...formData, service_type: service.value });
+                                      setFormData({ ...formData, selectedPackage: pkg.value });
                                       setSelectOpen(false);
                                       if (errors.service_type) {
                                         setErrors({ ...errors, service_type: null });
                                       }
                                     }}
                                     className={`w-full text-left px-4 py-3.5 text-sm transition-colors hover:bg-[#E76F51]/5 hover:text-[#E76F51] ${
-                                      formData.service_type === service.value
+                                      formData.selectedPackage === pkg.value
                                         ? 'bg-[#E76F51]/10 text-[#E76F51] font-semibold'
                                         : 'text-slate-700'
                                     }`}
                                   >
-                                    {service.label}
+                                    {pkg.label}
                                   </button>
                                 </li>
                               ))}
@@ -386,18 +625,20 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                   <div className="pt-2">
                     <motion.button
                       type="submit"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      disabled={loading}
-                      className="w-full bg-[#E76F51] text-white hover:bg-[#d46247] disabled:bg-slate-400 py-3.5 rounded-xl text-sm font-semibold tracking-wider uppercase transition-colors shadow-lg shadow-[#E76F51]/10 flex items-center justify-center gap-2 cursor-pointer"
+                      whileHover={!loading && localCheckIn && localCheckOut ? { scale: 1.02 } : {}}
+                      whileTap={!loading && localCheckIn && localCheckOut ? { scale: 0.98 } : {}}
+                      disabled={loading || !localCheckIn || !localCheckOut}
+                      className="w-full bg-[#E76F51] text-white hover:bg-[#d46247] disabled:bg-slate-400 disabled:cursor-not-allowed py-3.5 rounded-xl text-sm font-semibold tracking-wider uppercase transition-colors shadow-lg shadow-[#E76F51]/10 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       {loading ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
                           <span>Traitement en cours...</span>
                         </>
+                      ) : !localCheckIn || !localCheckOut ? (
+                        <span>Sélectionnez vos dates</span>
                       ) : (
-                        <span>Confirmer ma Réservation</span>
+                        <span>Envoyer la demande</span>
                       )}
                     </motion.button>
                   </div>

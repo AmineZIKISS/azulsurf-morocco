@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../services/api';
 
 export default function Contact() {
+  const location = useLocation();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
     phone_number: '',
-    subject: '',
+    subject: location.state?.selectedService ? `Demande de réservation - ${location.state.selectedService}` : '',
     selected_service: 'Other',
-    message: '',
+    message: location.state?.selectedService ? `Bonjour, je souhaite effectuer une demande de réservation pour la formule : ${location.state.selectedService}.` : '',
   });
 
   const [loading, setLoading] = useState(false);

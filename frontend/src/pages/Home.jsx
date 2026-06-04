@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Users, ArrowRight, Sparkles, X, ChevronDown } from 'lucide-react';
 import DatePicker from 'react-datepicker';
@@ -7,8 +7,8 @@ import { format, parseISO, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/datepicker-coastal.css';
-import BookingModal from '../components/BookingModal';
 import api from '../services/api';
+import { useBooking } from '../context/BookingContext';
 
 // ── Custom transparent input that react-datepicker controls ──────────────────
 const DateInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
@@ -62,8 +62,10 @@ const CalendarLegend = ({ className, children }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [botOpen, setBotOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { openBookingModal } = useBooking();
   const [showToast, setShowToast] = useState(false);
   const [booking, setFormData] = useState({
     checkIn: null,
@@ -74,8 +76,9 @@ export default function Home() {
   const [bookedDates, setBookedDates] = useState([]);
   const [datesLoading, setDatesLoading] = useState(true);
 
+  // Fetch booked dates on mount
   useEffect(() => {
-    api.get('/reservations/booked-dates')
+    api.get('/booked-dates')
       .then(res => {
         const dates = (res.data.booked_dates || []).map(d => startOfDay(parseISO(d)));
         setBookedDates(dates);
@@ -88,15 +91,11 @@ export default function Home() {
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = (success = false) => {
-    setIsModalOpen(false);
-    if (success) {
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 4000);
-    }
+    openBookingModal('', {
+      checkIn: booking.checkIn ? toISODate(booking.checkIn) : '',
+      checkOut: booking.checkOut ? toISODate(booking.checkOut) : '',
+      guests: booking.guests,
+    });
   };
 
   // ── Animation variants ────────────────────────────────────────────────────
@@ -320,7 +319,7 @@ export default function Home() {
                   whileTap={{ scale: 0.97 }}
                   className="bg-[#E76F51] hover:bg-[#d46247] text-white px-9 py-3.5 rounded-xl font-label-md text-sm uppercase tracking-widest cursor-pointer shadow-lg shadow-[#E76F51]/20 transition-colors duration-200 flex items-center gap-2.5 whitespace-nowrap"
                 >
-                  <span>Réserver</span>
+                  <span>Envoyer la demande</span>
                   <ArrowRight size={15} strokeWidth={2.5} />
                 </motion.button>
               </div>
@@ -472,52 +471,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          CHATBOT FAB
-      ═══════════════════════════════════════════════════════════════════ */}
-      <div className="fixed bottom-8 right-8 z-[60]">
-        <div className="relative">
-          <button
-            onClick={() => setBotOpen(!botOpen)}
-            className="w-16 h-16 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center transform hover:scale-110 transition-all duration-200 active:scale-95 cursor-pointer outline-hidden border-none"
-          >
-            <span className="material-symbols-outlined text-3xl">smart_toy</span>
-          </button>
-
-          <AnimatePresence>
-            {botOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-                className="absolute bottom-20 right-0 w-72 bg-white rounded-2xl shadow-2xl p-6 border border-slate-100 flex flex-col space-y-3"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="font-headline-md text-[18px] text-primary font-bold">Azul Assistant</p>
-                  <button
-                    onClick={() => setBotOpen(false)}
-                    className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <p className="text-on-surface-variant text-sm leading-relaxed">
-                  Welcome to Mirleft! How can I help you plan your surf retreat today?
-                </p>
-                <div className="space-y-2 pt-2">
-                  <button className="w-full text-left p-2.5 rounded bg-surface-container-low text-[12px] hover:bg-primary-fixed transition-colors text-slate-700 font-medium">
-                    Booking availability
-                  </button>
-                  <button className="w-full text-left p-2.5 rounded bg-surface-container-low text-[12px] hover:bg-primary-fixed transition-colors text-slate-700 font-medium">
-                    Surf conditions today
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
           TOAST NOTIFICATION
@@ -549,19 +502,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          BOOKING MODAL
-      ═══════════════════════════════════════════════════════════════════ */}
-      <BookingModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        initialData={{
-          checkIn: booking.checkIn ? toISODate(booking.checkIn) : '',
-          checkOut: booking.checkOut ? toISODate(booking.checkOut) : '',
-          guests: booking.guests,
-        }}
-      />
     </div>
   );
 }
