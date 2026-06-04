@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, Package, Shield, BedDouble, Compass, 
+  LayoutDashboard, Package, 
   Image, Star, Mail, Settings, LogOut, Waves, User, Menu, X 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -30,9 +30,6 @@ export default function AdminLayout({ children }) {
   const menuItems = [
     { name: 'Réservations', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Packages', path: '/admin/packages', icon: Package },
-    { name: 'Cours de Surf', path: '/admin/lessons', icon: Shield },
-    { name: 'Chambres', path: '/admin/rooms', icon: BedDouble },
-    { name: 'Excursions', path: '/admin/guiding', icon: Compass },
     { name: 'Galerie', path: '/admin/gallery', icon: Image },
     { name: 'Avis Clients', path: '/admin/reviews', icon: Star },
     { name: 'Messages Inbox', path: '/admin/contacts', icon: Mail },

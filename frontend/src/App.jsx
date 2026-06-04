@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { BookingProvider } from './context/BookingContext';
 import MainLayout from './layouts/MainLayout';
@@ -25,9 +25,6 @@ import Dashboard from './pages/Dashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminPackages from './pages/admin/AdminPackages';
-import AdminLessons from './pages/admin/AdminLessons';
-import AdminRooms from './pages/admin/AdminRooms';
-import AdminServices from './pages/admin/AdminServices';
 import AdminGallery from './pages/admin/AdminGallery';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminMessages from './pages/admin/AdminMessages';
@@ -41,53 +38,66 @@ const AdminPlaceholder = ({ name }) => (
   </div>
 );
 
+// Inner component so useLocation can be called inside <Router>
+function AppContent() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <>
+      <Routes>
+        {/* Public Routes inside MainLayout */}
+        <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+        <Route path="/surf-packages" element={<MainLayout><SurfPackages /></MainLayout>} />
+        <Route path="/lessons" element={<MainLayout><Lessons /></MainLayout>} />
+        <Route path="/rooms" element={<MainLayout><Rooms /></MainLayout>} />
+        <Route path="/surf-camp" element={<MainLayout><SurfCamp /></MainLayout>} />
+        <Route path="/surf-school" element={<MainLayout><SurfSchool /></MainLayout>} />
+        <Route path="/surf-guiding" element={<MainLayout><SurfGuiding /></MainLayout>} />
+        <Route path="/gallery" element={<MainLayout><Gallery /></MainLayout>} />
+        <Route path="/about" element={<MainLayout><AboutUs /></MainLayout>} />
+        <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+        <Route path="/reserver" element={<MainLayout><Contact /></MainLayout>} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Admin Protected Routes */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </AdminProtectedRoute>
+          } 
+        />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/packages" element={<AdminProtectedRoute><AdminLayout><AdminPackages /></AdminLayout></AdminProtectedRoute>} />
+        <Route path="/admin/gallery" element={<AdminProtectedRoute><AdminLayout><AdminGallery /></AdminLayout></AdminProtectedRoute>} />
+        <Route path="/admin/reviews" element={<AdminProtectedRoute><AdminLayout><AdminReviews /></AdminLayout></AdminProtectedRoute>} />
+        <Route path="/admin/contacts" element={<AdminProtectedRoute><AdminLayout><AdminMessages /></AdminLayout></AdminProtectedRoute>} />
+        <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminPlaceholder name="System Settings" /></AdminLayout></AdminProtectedRoute>} />
+        
+        {/* Catch all 404 */}
+        <Route path="*" element={<MainLayout><div className="py-20 text-center text-slate-500">Page not found.</div></MainLayout>} />
+      </Routes>
+
+      {/* Client-only widgets — hidden on all /admin routes */}
+      {!isAdminRoute && <WhatsAppButton />}
+      {!isAdminRoute && <Chatbot />}
+
+      {/* Global booking modal — always mounted */}
+      <BookingModal />
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <BookingProvider>
         <Router>
-          <Routes>
-            {/* Public Routes inside MainLayout */}
-            <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-            <Route path="/surf-packages" element={<MainLayout><SurfPackages /></MainLayout>} />
-            <Route path="/lessons" element={<MainLayout><Lessons /></MainLayout>} />
-            <Route path="/rooms" element={<MainLayout><Rooms /></MainLayout>} />
-            <Route path="/surf-camp" element={<MainLayout><SurfCamp /></MainLayout>} />
-            <Route path="/surf-school" element={<MainLayout><SurfSchool /></MainLayout>} />
-            <Route path="/surf-guiding" element={<MainLayout><SurfGuiding /></MainLayout>} />
-            <Route path="/gallery" element={<MainLayout><Gallery /></MainLayout>} />
-            <Route path="/about" element={<MainLayout><AboutUs /></MainLayout>} />
-            <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-            <Route path="/reserver" element={<MainLayout><Contact /></MainLayout>} />
-            <Route path="/login" element={<Login />} />
-
-            {/* Admin Protected Routes */}
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <AdminProtectedRoute>
-                  <AdminLayout>
-                    <AdminDashboard />
-                  </AdminLayout>
-                </AdminProtectedRoute>
-              } 
-            />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/packages" element={<AdminProtectedRoute><AdminLayout><AdminPackages /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/lessons" element={<AdminProtectedRoute><AdminLayout><AdminLessons /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/rooms" element={<AdminProtectedRoute><AdminLayout><AdminRooms /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/guiding" element={<AdminProtectedRoute><AdminLayout><AdminServices /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/gallery" element={<AdminProtectedRoute><AdminLayout><AdminGallery /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/reviews" element={<AdminProtectedRoute><AdminLayout><AdminReviews /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/contacts" element={<AdminProtectedRoute><AdminLayout><AdminMessages /></AdminLayout></AdminProtectedRoute>} />
-            <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminPlaceholder name="System Settings" /></AdminLayout></AdminProtectedRoute>} />
-            
-            {/* Catch all 404 */}
-            <Route path="*" element={<MainLayout><div className="py-20 text-center text-slate-500">Page not found.</div></MainLayout>} />
-          </Routes>
-          <WhatsAppButton />
-          <Chatbot />
-          <BookingModal />
+          <AppContent />
         </Router>
       </BookingProvider>
     </AuthProvider>
