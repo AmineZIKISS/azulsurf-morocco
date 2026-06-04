@@ -43,7 +43,8 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->integer('number_of_people')->default(1);
-            $table->date('preferred_date');
+            $table->date('check_in');
+            $table->date('check_out');
 
             $table->text('message')->nullable();
 

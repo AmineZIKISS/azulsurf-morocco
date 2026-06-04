@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Route;
 // ─── Public Routes ───────────────────────────────────────────────
 
 Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('/admin/login', [App\Http\Controllers\Api\AdminController::class, 'adminLogin']);
 
 Route::post('/contact', [App\Http\Controllers\Api\ContactController::class, 'store']);
 Route::post('/reservations', [App\Http\Controllers\Api\ReservationController::class, 'store']);
+Route::get('/reservations/booked-dates', [App\Http\Controllers\Api\ReservationController::class, 'bookedDates']);
 
 Route::get('/packages', [App\Http\Controllers\Api\PackageController::class, 'index']);
 Route::get('/packages/{package:slug}', [App\Http\Controllers\Api\PackageController::class, 'show']);
@@ -56,8 +58,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('reviews', App\Http\Controllers\Admin\ReviewController::class);
         Route::apiResource('settings', App\Http\Controllers\Admin\SettingController::class);
 
-        Route::get('/reservations', [App\Http\Controllers\Admin\ReservationController::class, 'index']);
+        Route::get('/reservations', [App\Http\Controllers\Api\AdminController::class, 'getReservations']);
+        Route::get('/reservations/{reservation}', [App\Http\Controllers\Admin\ReservationController::class, 'show']);
         Route::patch('/reservations/{reservation}/status', [App\Http\Controllers\Admin\ReservationController::class, 'updateStatus']);
+        Route::put('/reservations/{id}/status', [App\Http\Controllers\Api\AdminController::class, 'updateReservationStatus']);
+        Route::delete('/reservations/{reservation}', [App\Http\Controllers\Admin\ReservationController::class, 'destroy']);
 
         Route::get('/contacts', [App\Http\Controllers\Admin\ContactController::class, 'index']);
         Route::get('/contacts/{contact}', [App\Http\Controllers\Admin\ContactController::class, 'show']);

@@ -31,14 +31,16 @@ class Reservation extends Model
         'room_id',
         'guiding_service_id',
         'number_of_people',
-        'preferred_date',
+        'check_in',
+        'check_out',
         'message',
         'status',
     ];
 
     protected $casts = [
         'number_of_people' => 'integer',
-        'preferred_date' => 'date',
+        'check_in' => 'date',
+        'check_out' => 'date',
     ];
 
     public function package(): BelongsTo

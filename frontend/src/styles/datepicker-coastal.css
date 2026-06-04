@@ -1,0 +1,270 @@
+/* ============================================================
+   Azul Surf Morocco — Premium Coastal DatePicker Theme v3
+   ============================================================ */
+
+/* ── 1. POPPER container — must be ABOVE everything ── */
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+/* ── 2. CALENDAR PANEL — 100% solid, no transparency ── */
+.react-datepicker {
+  background-color: white !important;
+  font-family: inherit !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+  border-radius: 18px;
+  overflow: hidden;
+  width: max-content !important;
+  display: inline-block !important;
+}
+
+/* ── 3. HEADER — solid deep teal ── */
+.azul-dp-popper .react-datepicker__header {
+  background: #004655 !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  padding: 14px 8px 10px !important;
+}
+
+/* Month + Year label */
+.azul-dp-popper .react-datepicker__current-month {
+  font-family: 'Noto Serif', serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  margin: 0 0 10px 0;
+}
+
+/* ── 4. NAVIGATION ARROWS — white, clearly visible on teal ──
+   CRITICAL: Do NOT override border-width or top on ::before.
+   react-datepicker uses specific values for arrow direction.
+   Only override border-color here. ── */
+.azul-dp-popper .react-datepicker__navigation {
+  top: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  transition: background 0.18s ease;
+}
+
+.azul-dp-popper .react-datepicker__navigation:hover {
+  background: rgba(231, 111, 81, 0.28);
+}
+
+.azul-dp-popper .react-datepicker__navigation--previous {
+  left: 10px;
+}
+
+.azul-dp-popper .react-datepicker__navigation--next {
+  right: 10px;
+}
+
+/* Arrow icon — ONLY override color, nothing else */
+.azul-dp-popper .react-datepicker__navigation-icon::before {
+  border-color: rgba(255, 255, 255, 0.88) !important;
+  /* Do NOT override border-width — react-datepicker needs 3px 3px 0 0 */
+  /* Do NOT override top — react-datepicker controls arrow direction with it */
+}
+
+.azul-dp-popper .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: #E76F51 !important;
+}
+
+/* ── 5. DAY-OF-WEEK HEADER ROW ── */
+.azul-dp-popper .react-datepicker__day-names {
+  background: #004655 !important;
+  margin: 0;
+  padding: 0 6px 8px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.azul-dp-popper .react-datepicker__day-name {
+  color: rgba(178, 235, 255, 0.65);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  width: 36px;
+  line-height: 1;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── 6. MONTH GRID — solid background ── */
+.azul-dp-popper .react-datepicker__month-container {
+  float: none;
+}
+
+.azul-dp-popper .react-datepicker__month {
+  background: #FDFBF7 !important;
+  margin: 8px 6px 6px;
+}
+
+.azul-dp-popper .react-datepicker__week {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1px;
+}
+
+/* ── 7. INDIVIDUAL DAY CELLS ── */
+.azul-dp-popper .react-datepicker__day {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 9px;
+  color: #1a2e34;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin: 1px;
+  text-align: center;
+  position: relative;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.12s ease;
+  cursor: pointer;
+}
+
+/* Hover — available days */
+.azul-dp-popper .react-datepicker__day:not(.react-datepicker__day--disabled):not(.react-datepicker__day--selected):hover {
+  background-color: #f0fdfa !important; /* teal-50 */
+  color: #0d9488 !important; /* teal-600 */
+  font-weight: 700;
+  border-radius: 50% !important;
+  transform: scale(1.07);
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.12s ease;
+}
+
+/* ── SELECTED day ── */
+.azul-dp-popper .react-datepicker__day--selected,
+.azul-dp-popper .react-datepicker__day--keyboard-selected {
+  background-color: #F07167 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 3px 12px rgba(240, 113, 103, 0.45) !important;
+  transform: scale(1.05);
+}
+
+/* Pulsing outer ring on selected date */
+.azul-dp-popper .react-datepicker__day--selected::after,
+.azul-dp-popper .react-datepicker__day--keyboard-selected::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(240, 113, 103, 0.35);
+  pointer-events: none;
+  animation: azul-pulse-ring 1.8s ease-in-out infinite;
+}
+
+@keyframes azul-pulse-ring {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 0;   transform: scale(1.3); }
+}
+
+/* ── TODAY ── */
+.azul-dp-popper .react-datepicker__day--today:not(.react-datepicker__day--selected) {
+  background-color: transparent !important;
+  color: #0A3F5C !important;
+  font-weight: 700;
+  border-radius: 50% !important;
+  box-shadow: inset 0 0 0 2px #0A3F5C !important;
+}
+
+/* ── BOOKED / DISABLED dates ── */
+.azul-dp-popper .react-datepicker__day--disabled {
+  background-color: #e2e8f0 !important; /* slate-200 */
+  color: #94a3b8 !important; /* slate-400 */
+  border: 1px solid #cbd5e1 !important; /* slate-300 */
+  cursor: not-allowed !important;
+  text-decoration: line-through;
+  border-radius: 50% !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.azul-dp-popper .react-datepicker__day--disabled::after {
+  display: none !important;
+}
+
+.azul-dp-popper .react-datepicker__day--disabled:hover {
+  background-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  transform: none !important;
+}
+
+/* ── OUTSIDE-MONTH days ── */
+.azul-dp-popper .react-datepicker__day--outside-month {
+  color: #c4d2d5;
+  opacity: 0.32;
+}
+
+/* ── 8. LEGEND / STATUS BAR ── */
+.azul-dp-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: #f2efe9;
+  border-top: 1px solid rgba(0, 70, 85, 0.08);
+}
+
+.azul-dp-legend-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px;
+  font-size: 0.59rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #5a7278;
+  border-right: 1px solid rgba(0, 70, 85, 0.07);
+  white-space: nowrap;
+}
+
+.azul-dp-legend-item:last-child {
+  border-right: none;
+}
+
+.azul-dp-legend-swatch {
+  display: inline-flex;
+  width: 11px;
+  height: 11px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ── 9. HIDE default triangle arrow ── */
+.azul-dp-popper .react-datepicker__triangle,
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+/* ── 10. WRAPPER ── */
+.azul-datepicker-wrapper {
+  width: 100%;
+}
+
+/* ── 11. CUSTOM INPUT BUTTON ── */
+.azul-datepicker-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a2e34;
+  cursor: pointer;
+  caret-color: transparent;
+  font-family: 'Hanken Grotesk', sans-serif;
+  text-align: left;
+}
