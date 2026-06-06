@@ -1,12 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Mail, Phone, Send, ArrowRight } from 'lucide-react';
+import { MapPin, Mail, Phone, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   const handleSubscribe = (e) => {
     e.preventDefault();
-    alert('Thank you for subscribing to Azul Surf updates!');
+    alert(t('footer.subscribeAlert'));
   };
 
   // Framer Motion variants for scroll entrance
@@ -51,7 +54,7 @@ export default function Footer() {
             <span className="font-light tracking-[0.15em] opacity-80 text-[0.8em]">SURF</span>
           </Link>
           <p className="text-on-surface-variant/80 font-body-md text-sm leading-relaxed max-w-xs">
-            A sanctuary where Moroccan tradition meets the rhythm of the ocean. High-end surf instruction and coastal minimalism.
+            {t('footer.brandDescription')}
           </p>
           <div className="flex items-center gap-4 pt-2">
             <motion.a 
@@ -81,14 +84,14 @@ export default function Footer() {
 
         {/* Column 2: Experiences */}
         <motion.div variants={columnVariants} className="space-y-6">
-          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">Experiences</h4>
+          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">{t('footer.experiences')}</h4>
           <ul className="space-y-3 font-body-md text-sm">
             <li>
               <Link 
                 className="inline-block transition-all duration-300 hover:translate-x-1.5 hover:text-primary text-on-surface-variant/80" 
                 to="/surf-school"
               >
-                Surf School
+                {t('nav.surfSchool')}
               </Link>
             </li>
             <li>
@@ -96,7 +99,7 @@ export default function Footer() {
                 className="inline-block transition-all duration-300 hover:translate-x-1.5 hover:text-primary text-on-surface-variant/80" 
                 to="/surf-guiding"
               >
-                Surf Guiding
+                {t('nav.surfGuiding')}
               </Link>
             </li>
             <li>
@@ -104,7 +107,7 @@ export default function Footer() {
                 className="inline-block transition-all duration-300 hover:translate-x-1.5 hover:text-primary text-on-surface-variant/80" 
                 to="/surf-packages"
               >
-                Surf Packages
+                {t('nav.surfPackages')}
               </Link>
             </li>
             <li>
@@ -112,7 +115,7 @@ export default function Footer() {
                 className="inline-block transition-all duration-300 hover:translate-x-1.5 hover:text-primary text-on-surface-variant/80" 
                 to="/gallery"
               >
-                Galerie
+                {t('nav.gallery')}
               </Link>
             </li>
           </ul>
@@ -120,13 +123,14 @@ export default function Footer() {
 
         {/* Column 3: Contact */}
         <motion.div variants={columnVariants} className="space-y-6">
-          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">Contact Us</h4>
+          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">{t('footer.contactUs')}</h4>
           <ul className="space-y-4 font-body-md text-sm text-on-surface-variant/80">
             <li className="flex items-start gap-3">
               <MapPin size={18} className="text-primary shrink-0 mt-0.5" />
               <span>
-                Mirleft Coast Road, BP 12<br />
-                Tiznit, Morocco
+                {t('footer.address').split('\n').map((line, i) => (
+                  <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>
+                ))}
               </span>
             </li>
             <li className="flex items-center gap-3">
@@ -146,15 +150,15 @@ export default function Footer() {
 
         {/* Column 4: Newsletter */}
         <motion.div variants={columnVariants} className="space-y-6">
-          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">Newsletter</h4>
+          <h4 className="font-label-md text-xs uppercase tracking-widest text-primary font-bold">{t('footer.newsletter')}</h4>
           <p className="font-body-md text-sm text-on-surface-variant/80">
-            Join our mailing list for swells, beach stories, and retreats updates.
+            {t('footer.newsletterDesc')}
           </p>
           <form onSubmit={handleSubscribe} className="space-y-3">
             <div className="relative">
               <input 
                 className="w-full bg-transparent border-0 border-b border-outline-variant/60 focus:border-primary py-2.5 px-0 font-body-md text-sm text-on-surface transition-colors placeholder:text-outline-variant/80" 
-                placeholder="Your email address" 
+                placeholder={t('footer.emailPlaceholder')}
                 type="email"
                 required
               />
@@ -165,7 +169,7 @@ export default function Footer() {
               className="w-full bg-[#E76F51] text-white py-3 rounded-full font-label-md text-xs uppercase tracking-widest hover:bg-[#d46247] transition-colors shadow-md shadow-[#E76F51]/10 hover:shadow-lg hover:shadow-[#E76F51]/20 cursor-pointer flex items-center justify-center gap-2"
               type="submit"
             >
-              <span>Subscribe</span>
+              <span>{t('footer.subscribe')}</span>
               <ArrowRight size={14} />
             </motion.button>
           </form>
@@ -175,7 +179,7 @@ export default function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-black/5 py-8 text-center px-margin-mobile">
         <p className="font-body-md text-xs text-on-surface-variant/60 tracking-wider">
-          © {new Date().getFullYear()} Azul Surf Mirleft. High-End Coastal Tranquility. All Rights Reserved. | <Link to="/" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          {t('footer.copyright', { year: new Date().getFullYear() })} | <Link to="/" className="hover:text-primary transition-colors">{t('footer.privacyPolicy')}</Link>
         </p>
       </div>
     </footer>

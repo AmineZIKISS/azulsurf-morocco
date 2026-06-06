@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Star, Plus, Edit, Trash2, Loader2, X,
   Check, AlertCircle, Info, Sparkles, StarHalf
@@ -7,6 +8,7 @@ import {
 import api from '../../services/api';
 
 export default function AdminReviews() {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -53,7 +55,7 @@ export default function AdminReviews() {
       }
     } catch (err) {
       console.error('Fetch reviews error:', err);
-      setError('Impossible de charger les avis. Veuillez réessayer.');
+      setError(t('adminReviews.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -87,7 +89,7 @@ export default function AdminReviews() {
     setError('');
 
     if (!clientName.trim()) {
-      setError('Le nom du client est requis.');
+      setError(t('adminReviews.nameRequired'));
       setSubmitLoading(false);
       return;
     }
@@ -109,11 +111,11 @@ export default function AdminReviews() {
       if (selectedReview) {
         // Standard JSON PUT request
         await api.put(`/admin/reviews/${selectedReview.id}`, payload);
-        setSuccess('Avis mis à jour avec succès.');
+        setSuccess(t('adminReviews.updateSuccess'));
       } else {
         // Standard JSON POST request
         await api.post('/admin/reviews', payload);
-        setSuccess('Avis créé avec succès.');
+        setSuccess(t('adminReviews.createSuccess'));
       }
 
       fetchReviews();
@@ -142,7 +144,7 @@ export default function AdminReviews() {
       fetchReviews();
     } catch (err) {
       console.error('Toggle approval error:', err);
-      setError('Erreur lors de la modification du statut.');
+      setError(t('adminReviews.approvalError'));
     } finally {
       setStatusLoadingId(null);
     }
@@ -161,7 +163,7 @@ export default function AdminReviews() {
     
     try {
       await api.delete(`/admin/reviews/${reviewToDelete.id}`);
-      setSuccess('Avis supprimé définitivement.');
+      setSuccess(t('adminReviews.deleteSuccess'));
       fetchReviews();
     } catch (err) {
       console.error('Delete review error:', err);
@@ -191,15 +193,15 @@ export default function AdminReviews() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-200/50">
         <div>
-          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">Modération des Avis Clients</h2>
-          <p className="text-xs text-slate-400 mt-1">Validez et publiez les témoignages reçus sur la page d'accueil.</p>
+          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">{t('adminReviews.title')}</h2>
+          <p className="text-xs text-slate-400 mt-1">{t('adminReviews.subtitle')}</p>
         </div>
         <button
           onClick={openCreateModal}
           className="inline-flex items-center gap-2 bg-[#E76F51] hover:bg-[#d46247] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#E76F51]/15 hover:shadow-lg cursor-pointer border-none"
         >
           <Plus size={16} />
-          <span>Ajouter un Témoignage</span>
+          <span>{t('adminReviews.addReview')}</span>
         </button>
       </header>
 
@@ -237,7 +239,7 @@ export default function AdminReviews() {
 
       <div className="bg-white border border-slate-200/80 shadow-xs rounded-3xl overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h3 className="font-semibold text-[#004655] text-sm">Témoignages recueillis ({reviews.length})</h3>
+          <h3 className="font-semibold text-[#004655] text-sm">{t('adminReviews.collectedReviews')} ({reviews.length})</h3>
           <span className="bg-[#004655]/5 text-[#004655] px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">
             CMS Actif
           </span>
@@ -247,23 +249,23 @@ export default function AdminReviews() {
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Loader2 className="animate-spin text-[#E76F51]" size={36} />
-              <p className="text-sm font-medium">Chargement des avis...</p>
+              <p className="text-sm font-medium">{t('adminReviews.loading')}</p>
             </div>
           ) : reviews.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Info size={36} className="text-slate-300" />
-              <p className="text-sm font-medium">Aucun avis trouvé. Ajoutez-en un manuellement pour commencer.</p>
+              <p className="text-sm font-medium">{t('adminReviews.emptyState')}</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-4">Client</th>
-                  <th className="px-6 py-4">Note</th>
-                  <th className="px-6 py-4 w-96">Message de l'avis</th>
-                  <th className="px-6 py-4">Approuvé</th>
-                  <th className="px-6 py-4">Visibilité</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4">{t('adminReviews.colClient')}</th>
+                  <th className="px-6 py-4">{t('adminReviews.colRating')}</th>
+                  <th className="px-6 py-4 w-96">{t('adminReviews.colMessage')}</th>
+                  <th className="px-6 py-4">{t('adminReviews.colApproved')}</th>
+                  <th className="px-6 py-4">{t('adminReviews.colVisibility')}</th>
+                  <th className="px-6 py-4 text-right">{t('adminReviews.colActions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -292,7 +294,7 @@ export default function AdminReviews() {
                               : 'bg-amber-50 text-amber-700 border-amber-250 hover:bg-amber-100'
                           }`}
                         >
-                          {review.is_approved ? 'Oui' : 'En attente'}
+                          {review.is_approved ? t('adminReviews.yes') : t('adminReviews.pending')}
                         </button>
                       )}
                     </td>
@@ -302,7 +304,7 @@ export default function AdminReviews() {
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                           : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}>
-                        {review.is_active ? 'Actif' : 'Masqué'}
+                        {review.is_active ? t('adminReviews.active') : t('adminReviews.hidden')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -357,7 +359,7 @@ export default function AdminReviews() {
                 <div>
                   <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
                     <Sparkles className="text-[#E76F51] h-5 w-5" />
-                    {selectedReview ? 'Modifier le Témoignage' : 'Créer un Témoignage'}
+                    {selectedReview ? t('adminReviews.editReview') : t('adminReviews.createReview')}
                   </h3>
                   <p className="text-[10px] text-white/60 uppercase tracking-widest mt-0.5">
                     {selectedReview ? `Témoignage ID: #${selectedReview.id}` : 'Avis client Azul Surf'}
@@ -371,40 +373,40 @@ export default function AdminReviews() {
               <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-5 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nom du Client</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminReviews.clientName')}</label>
                     <input
                       type="text"
                       required
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      placeholder="Ex: Elena Rossi"
+                      placeholder={t('adminReviews.clientNamePlaceholder')}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Note (Étoiles 1-5)</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminReviews.rating')}</label>
                     <select
                       value={rating}
                       onChange={(e) => setRating(Number(e.target.value))}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
                     >
-                      <option value="5">5 Étoiles (Excellent)</option>
-                      <option value="4">4 Étoiles (Très bon)</option>
-                      <option value="3">3 Étoiles (Moyen)</option>
-                      <option value="2">2 Étoiles (Médiocre)</option>
-                      <option value="1">1 Étoile (Mauvais)</option>
+                      <option value="5">{t('adminReviews.stars5')}</option>
+                      <option value="4">{t('adminReviews.stars4')}</option>
+                      <option value="3">{t('adminReviews.stars3')}</option>
+                      <option value="2">{t('adminReviews.stars2')}</option>
+                      <option value="1">{t('adminReviews.stars1')}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Message de l'Avis</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminReviews.reviewMessage')}</label>
                   <textarea
                     rows={4}
                     required
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Contenu du témoignage du client..."
+                    placeholder={t('adminReviews.reviewMessagePlaceholder')}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
                   />
                 </div>
@@ -413,8 +415,8 @@ export default function AdminReviews() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center justify-between p-4 bg-[#004655]/5 rounded-2xl border border-[#004655]/10">
                     <div>
-                      <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">Approuvé</span>
-                      <span className="text-[10px] text-slate-500">Valider pour publication</span>
+                      <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">{t('adminReviews.colApproved')}</span>
+                      <span className="text-[10px] text-slate-500">{t('adminReviews.validatePublish')}</span>
                     </div>
                     <button
                       type="button"
@@ -435,7 +437,7 @@ export default function AdminReviews() {
                   <div className="flex items-center justify-between p-4 bg-[#004655]/5 rounded-2xl border border-[#004655]/10">
                     <div>
                       <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">Actif</span>
-                      <span className="text-[10px] text-slate-500">Visible sur le site</span>
+                      <span className="text-[10px] text-slate-500">{t('adminReviews.visibleSite')}</span>
                     </div>
                     <button
                       type="button"
@@ -470,10 +472,10 @@ export default function AdminReviews() {
                     {submitLoading ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        <span>Enreg...</span>
+                        <span>{t('adminReviews.saving')}</span>
                       </>
                     ) : (
-                      <span>Enregistrer</span>
+                      <span>{t('adminReviews.save')}</span>
                     )}
                   </button>
                 </div>
@@ -505,9 +507,9 @@ export default function AdminReviews() {
                 <Trash2 size={20} />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-base font-bold text-slate-900">Supprimer cet avis ?</h3>
+                <h3 className="text-base font-bold text-slate-900">{t('adminReviews.deleteConfirmTitle')}</h3>
                 <p className="text-xs text-slate-500">
-                  Voulez-vous vraiment supprimer définitivement le témoignage de <span className="font-semibold text-slate-700">"{reviewToDelete?.client_name}"</span> ? cette action est irréversible.
+                  {t('adminReviews.deleteConfirmDesc')} <span className="font-semibold text-slate-700">"{reviewToDelete?.client_name}"</span> ? {t('adminReviews.deleteConfirmWarning')}
                 </p>
               </div>
               <div className="flex gap-3 justify-center pt-2">

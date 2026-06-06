@@ -1,25 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Gallery() {
+  const { t } = useTranslation();
+
   return (
     <main className="flex-grow">
       {/* Hero Section */}
       <section className="w-full px-margin-mobile md:px-margin-desktop pt-24 pb-12 max-w-container-max mx-auto text-center animate-in fade-in duration-300">
-        <h1 className="font-display-lg text-display-lg text-primary mb-6">Moments Capturés</h1>
+        <h1 className="font-display-lg text-display-lg text-primary mb-6">{t('gallery.heroTitle')}</h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
-          Plongez dans l'essence de Mirleft. Une collection visuelle de nos vagues, de notre sanctuaire et des instants de quiétude partagés sur la côte marocaine.
+          {t('gallery.heroSubtitle')}
         </p>
       </section>
 
       {/* Minimalist Filters */}
       <section className="w-full px-margin-mobile md:px-margin-desktop pb-12 max-w-container-max mx-auto flex justify-center">
         <div className="flex flex-wrap justify-center gap-8">
-          <button className="font-label-md text-label-md uppercase tracking-wider text-primary border-b border-primary pb-1 cursor-pointer">Tous</button>
-          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">Surf</button>
-          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">L'hébergement</button>
-          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">Yoga</button>
-          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">Paysages</button>
+          <button className="font-label-md text-label-md uppercase tracking-wider text-primary border-b border-primary pb-1 cursor-pointer">{t('gallery.filterAll')}</button>
+          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">{t('gallery.filterSurf')}</button>
+          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">{t('gallery.filterAccommodation')}</button>
+          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">{t('gallery.filterYoga')}</button>
+          <button className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors pb-1 border-b border-transparent cursor-pointer">{t('gallery.filterLandscapes')}</button>
         </div>
       </section>
 
@@ -88,15 +91,15 @@ export default function Gallery() {
       {/* Call to Action */}
       <section className="w-full px-margin-mobile md:px-margin-desktop py-section-padding bg-surface-container-lowest border-t border-surface-variant">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-headline-lg text-headline-lg text-primary mb-6">Prêt à vivre l'expérience ?</h2>
+          <h2 className="font-headline-lg text-headline-lg text-primary mb-6">{t('gallery.ctaTitle')}</h2>
           <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
-            Rejoignez-nous à Mirleft pour une retraite inoubliable où l'océan dicte le rythme. Réservez votre séjour et trouvez votre équilibre.
+            {t('gallery.ctaSubtitle')}
           </p>
           <Link 
             to="/surf-packages" 
             className="inline-block bg-primary text-on-primary font-label-md text-label-md uppercase tracking-wider px-8 py-4 rounded-lg hover-lift text-center cursor-pointer"
           >
-            Découvrir Nos Packages
+            {t('gallery.ctaButton')}
           </Link>
         </div>
       </section>

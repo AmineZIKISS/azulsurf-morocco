@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export default function Chatbot() {
   const [botOpen, setBotOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="fixed bottom-24 right-6 z-[60]">
@@ -24,7 +26,7 @@ export default function Chatbot() {
               className="absolute bottom-16 right-0 w-72 bg-[#FDFBF7] rounded-2xl shadow-2xl p-6 border border-slate-200 flex flex-col space-y-3"
             >
               <div className="flex justify-between items-center">
-                <p className="font-headline-md text-[18px] text-[#004655] font-bold">Azul Assistant</p>
+                <p className="font-headline-md text-[18px] text-[#004655] font-bold">{t('chatbot.title')}</p>
                 <button
                   onClick={() => setBotOpen(false)}
                   className="text-slate-400 hover:text-slate-600 text-sm font-bold p-1 cursor-pointer"
@@ -33,14 +35,14 @@ export default function Chatbot() {
                 </button>
               </div>
               <p className="text-on-surface-variant text-sm leading-relaxed">
-                Welcome to Mirleft! How can I help you plan your surf retreat today?
+                {t('chatbot.welcome')}
               </p>
               <div className="space-y-2 pt-2">
                 <button className="w-full text-left p-2.5 rounded bg-surface-container-low text-[12px] hover:bg-primary-fixed transition-colors text-slate-700 font-medium cursor-pointer">
-                  Booking availability
+                  {t('chatbot.bookingAvailability')}
                 </button>
                 <button className="w-full text-left p-2.5 rounded bg-surface-container-low text-[12px] hover:bg-primary-fixed transition-colors text-slate-700 font-medium cursor-pointer">
-                  Surf conditions today
+                  {t('chatbot.surfConditions')}
                 </button>
               </div>
             </motion.div>

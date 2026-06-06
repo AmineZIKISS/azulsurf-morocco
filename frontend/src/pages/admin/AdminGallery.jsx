@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Image as ImageIcon, Plus, Edit, Trash2, Loader2, X,
   Check, AlertCircle, Info, Globe, Sparkles, Filter
@@ -7,6 +8,7 @@ import {
 import api from '../../services/api';
 
 export default function AdminGallery() {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -60,7 +62,7 @@ export default function AdminGallery() {
       }
     } catch (err) {
       console.error('Fetch gallery error:', err);
-      setError('Impossible de charger la galerie. Veuillez réessayer.');
+      setError(t('adminGallery.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -96,7 +98,7 @@ export default function AdminGallery() {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setError("L'image est trop volumineuse. Taille maximale autorisée: 2 Mo.");
+        setError(t('adminGallery.sizeError'));
         return;
       }
       setImageFile(file);
@@ -115,7 +117,7 @@ export default function AdminGallery() {
 
     // For new item, image is required
     if (!selectedItem && !imageFile) {
-      setError('Veuillez sélectionner une image à téléverser.');
+      setError(t('adminGallery.imageRequired'));
       setSubmitLoading(false);
       return;
     }
@@ -141,12 +143,12 @@ export default function AdminGallery() {
         await api.post(`/admin/gallery/${selectedItem.id}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        setSuccess('Image mise à jour avec succès.');
+        setSuccess(t('adminGallery.updateSuccess'));
       } else {
         await api.post('/admin/gallery', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
-        setSuccess('Image ajoutée à la galerie.');
+        setSuccess(t('adminGallery.createSuccess'));
       }
 
       fetchGallery();
@@ -177,11 +179,11 @@ export default function AdminGallery() {
     
     try {
       await api.delete(`/admin/gallery/${itemToDelete.id}`);
-      setSuccess('Image supprimée de la galerie.');
+      setSuccess(t('adminGallery.deleteSuccess'));
       fetchGallery();
     } catch (err) {
       console.error('Delete gallery error:', err);
-      setError('Erreur lors de la suppression.');
+      setError(t('adminGallery.deleteError'));
     } finally {
       setDeleteLoadingId(null);
       setItemToDelete(null);
@@ -200,15 +202,15 @@ export default function AdminGallery() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-200/50">
         <div>
-          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">Galerie Photos</h2>
-          <p className="text-xs text-slate-400 mt-1">Gérez les visuels affichés dans la galerie publique d'Azul Surf.</p>
+          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">{t('adminGallery.title')}</h2>
+          <p className="text-xs text-slate-400 mt-1">{t('adminGallery.subtitle')}</p>
         </div>
         <button
           onClick={openCreateModal}
           className="inline-flex items-center gap-2 bg-[#E76F51] hover:bg-[#d46247] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#E76F51]/15 hover:shadow-lg cursor-pointer border-none"
         >
           <Plus size={16} />
-          <span>Ajouter une Photo</span>
+          <span>{t('adminGallery.addPhoto')}</span>
         </button>
       </header>
 
@@ -249,7 +251,7 @@ export default function AdminGallery() {
       <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded-2xl border border-slate-200/85 shadow-2xs">
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1.5">
           <Filter size={14} />
-          Filtrer:
+          {t('adminGallery.filter')}
         </span>
         <button
           onClick={() => setFilterCategory('All')}
@@ -259,7 +261,7 @@ export default function AdminGallery() {
               : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
           }`}
         >
-          Toutes ({items.length})
+          {t('adminGallery.all')} ({items.length})
         </button>
         {categories.map(cat => {
           const count = items.filter(i => i.category === cat).length;
@@ -283,12 +285,12 @@ export default function AdminGallery() {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 bg-white border border-slate-200/80 rounded-3xl gap-3">
           <Loader2 className="animate-spin text-[#E76F51]" size={36} />
-          <p className="text-sm font-medium">Chargement des photos...</p>
+          <p className="text-sm font-medium">{t('adminGallery.loading')}</p>
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 bg-white border border-slate-200/80 rounded-3xl gap-3">
           <Info size={36} className="text-slate-300" />
-          <p className="text-sm font-medium">Aucune photo trouvée pour cette catégorie.</p>
+          <p className="text-sm font-medium">{t('adminGallery.emptyState')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -324,10 +326,10 @@ export default function AdminGallery() {
               <div className="p-3.5 space-y-3">
                 <div className="min-h-8">
                   <h4 className="font-semibold text-slate-800 text-xs truncate">
-                    {item.title?.fr || item.title?.en || 'Sans titre'}
+                    {item.title?.fr || item.title?.en || t('adminGallery.untitled')}
                   </h4>
                   <span className="text-[10px] text-slate-400 block mt-0.5">
-                    Ajouté le {new Date(item.created_at).toLocaleDateString('fr-FR')}
+                    {t('adminGallery.addedOn')} {new Date(item.created_at).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
 
@@ -381,7 +383,7 @@ export default function AdminGallery() {
                 <div>
                   <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
                     <Sparkles className="text-[#E76F51] h-5 w-5" />
-                    {selectedItem ? 'Modifier la Photo' : 'Ajouter une Photo'}
+                    {selectedItem ? t('adminGallery.editPhoto') : t('adminGallery.addPhoto')}
                   </h3>
                   <p className="text-[10px] text-white/60 uppercase tracking-widest mt-0.5">
                     {selectedItem ? `Photo ID: #${selectedItem.id}` : 'Nouveau visuel Azul Surf'}
@@ -402,7 +404,7 @@ export default function AdminGallery() {
                     }`}
                   >
                     <Globe size={12} />
-                    <span>Titre Français</span>
+                    <span>{t('adminGallery.langFr')}</span>
                   </button>
                   <button
                     type="button"
@@ -412,30 +414,30 @@ export default function AdminGallery() {
                     }`}
                   >
                     <Globe size={12} />
-                    <span>English Title</span>
+                    <span>{t('adminGallery.langEn')}</span>
                   </button>
                 </div>
 
                 <div className="space-y-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                   {formLang === 'fr' ? (
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Titre / Légende (Optionnel - FR)</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminGallery.titleFr')}</label>
                       <input
                         type="text"
                         value={titleFr}
                         onChange={(e) => setTitleFr(e.target.value)}
-                        placeholder="Ex: Session coucher de soleil sur la plage"
+                        placeholder={t('adminGallery.titleFrPlaceholder')}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
                       />
                     </div>
                   ) : (
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Title / Legend (Optional - EN)</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminGallery.titleEn')}</label>
                       <input
                         type="text"
                         value={titleEn}
                         onChange={(e) => setTitleEn(e.target.value)}
-                        placeholder="Ex: Sunset surf session on the beach"
+                        placeholder={t('adminGallery.titleEnPlaceholder')}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
                       />
                     </div>
@@ -443,23 +445,23 @@ export default function AdminGallery() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Catégorie</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminGallery.category')}</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                   >
-                    <option value="Surf">Surf</option>
-                    <option value="Camp">Camp (Hébergement & Ambiance)</option>
-                    <option value="Activities">Activities (Yoga, Détente)</option>
-                    <option value="Trips">Trips (Excursions)</option>
-                    <option value="Food">Food (Plats Marocains)</option>
+                    <option value="Surf">{t('adminGallery.catSurf')}</option>
+                    <option value="Camp">{t('adminGallery.catCamp')}</option>
+                    <option value="Activities">{t('adminGallery.catActivities')}</option>
+                    <option value="Trips">{t('adminGallery.catTrips')}</option>
+                    <option value="Food">{t('adminGallery.catFood')}</option>
                   </select>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Image</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">{t('adminGallery.image')}</label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
                       className="border-2 border-dashed border-slate-200 hover:border-[#004655] rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer h-32 relative overflow-hidden"
@@ -468,13 +470,13 @@ export default function AdminGallery() {
                         <>
                           <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <span className="text-white text-xs font-semibold">Changer d'image</span>
+                            <span className="text-white text-xs font-semibold">{t('adminGallery.changeImage')}</span>
                           </div>
                         </>
                       ) : (
                         <div className="space-y-1">
                           <ImageIcon className="text-slate-400 mx-auto h-8 w-8" />
-                          <p className="text-[11px] text-slate-500 font-medium">Sélectionner une photo</p>
+                          <p className="text-[11px] text-slate-500 font-medium">{t('adminGallery.selectPhoto')}</p>
                         </div>
                       )}
                     </div>
@@ -490,8 +492,8 @@ export default function AdminGallery() {
                   <div className="space-y-4 pt-4">
                     <div className="flex items-center justify-between p-4 bg-[#004655]/5 rounded-2xl border border-[#004655]/10">
                       <div>
-                        <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">Visible en public</span>
-                        <span className="text-[10px] text-slate-500">Afficher dans la galerie</span>
+                        <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">{t('adminGallery.visiblePublic')}</span>
+                        <span className="text-[10px] text-slate-500">{t('adminGallery.showInGallery')}</span>
                       </div>
                       <button
                         type="button"
@@ -527,10 +529,10 @@ export default function AdminGallery() {
                     {submitLoading ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        <span>Enreg...</span>
+                        <span>{t('adminGallery.saving')}</span>
                       </>
                     ) : (
-                      <span>Enregistrer</span>
+                      <span>{t('adminGallery.save')}</span>
                     )}
                   </button>
                 </div>
@@ -562,7 +564,7 @@ export default function AdminGallery() {
                 <Trash2 size={20} />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-base font-bold text-slate-900">Supprimer de la Galerie ?</h3>
+                <h3 className="text-base font-bold text-slate-900">{t('adminGallery.deleteConfirmTitle')}</h3>
                 <p className="text-xs text-slate-500">
                   Voulez-vous vraiment supprimer définitivement cette photo de votre galerie ?
                 </p>

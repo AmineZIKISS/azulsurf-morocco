@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import api from '../services/api';
+import { useTranslation } from 'react-i18next';
+import api, { getCsrfCookie } from '../services/api';
 
 export default function Contact() {
   const location = useLocation();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -28,6 +30,7 @@ export default function Contact() {
     setError('');
 
     try {
+      await getCsrfCookie();
       const response = await api.post('/contact', formData);
       setSuccess(response.data.message || 'Your message has been sent successfully.');
       setFormData({
@@ -40,7 +43,7 @@ export default function Contact() {
       });
     } catch (err) {
       console.error('Contact submission error:', err);
-      const msg = err.response?.data?.message || 'Failed to submit. Please check validation requirements.';
+      const msg = err.response?.data?.message || t('contact.errorDefault');
       setError(msg);
     } finally {
       setLoading(false);
@@ -61,10 +64,10 @@ export default function Contact() {
         </div>
         <div className="relative z-10 w-full px-margin-desktop max-w-container-max mx-auto text-center md:text-left">
           <h1 className="font-display-lg text-display-lg md:text-[80px] leading-tight text-primary mb-6">
-            Contact Us
+            {t('contact.heroTitle')}
           </h1>
           <p className="font-headline-md text-headline-md text-on-surface-variant max-w-2xl">
-            We're here to help you find your rhythm on the waves. Reach out to plan your escape.
+            {t('contact.heroSubtitle')}
           </p>
         </div>
       </section>
@@ -88,10 +91,10 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="relative">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">Name</label>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">{t('contact.nameLabel')}</label>
                   <input 
                     className="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 font-body-md transition-all placeholder:text-outline-variant focus:border-primary-container" 
-                    placeholder="Your Full Name" 
+                    placeholder={t('contact.namePlaceholder')} 
                     type="text"
                     name="full_name"
                     value={formData.full_name}
@@ -101,10 +104,10 @@ export default function Contact() {
                   />
                 </div>
                 <div className="relative">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">Email</label>
+                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">{t('contact.emailLabel')}</label>
                   <input 
                     className="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 font-body-md transition-all placeholder:text-outline-variant focus:border-primary-container" 
-                    placeholder="Email Address" 
+                    placeholder={t('contact.emailPlaceholder')} 
                     type="email"
                     name="email"
                     value={formData.email}
@@ -115,10 +118,10 @@ export default function Contact() {
                 </div>
               </div>
               <div className="relative">
-                <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">Subject</label>
+                <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">{t('contact.subjectLabel')}</label>
                 <input 
                   className="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 font-body-md transition-all placeholder:text-outline-variant focus:border-primary-container" 
-                  placeholder="What is your inquiry about?" 
+                  placeholder={t('contact.subjectPlaceholder')} 
                   type="text"
                   name="subject"
                   value={formData.subject}
@@ -128,10 +131,10 @@ export default function Contact() {
                 />
               </div>
               <div className="relative">
-                <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">Message</label>
+                <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wide">{t('contact.messageLabel')}</label>
                 <textarea 
                   className="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 font-body-md transition-all placeholder:text-outline-variant focus:border-primary-container resize-none" 
-                  placeholder="How can we help you?" 
+                  placeholder={t('contact.messagePlaceholder')} 
                   rows="5"
                   name="message"
                   value={formData.message}
@@ -146,7 +149,7 @@ export default function Contact() {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? 'Sending Message...' : 'Send Message'}
+                  {loading ? t('contact.sending') : t('contact.sendMessage')}
                 </button>
               </div>
             </form>
@@ -160,7 +163,7 @@ export default function Contact() {
                   <span className="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
-                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">Address</h4>
+                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">{t('contact.addressTitle')}</h4>
                   <p className="font-body-lg text-body-lg text-on-surface-variant">
                     Mirleft Coast Road, BP 12, Tiznit, Morocco
                   </p>
@@ -171,7 +174,7 @@ export default function Contact() {
                   <span className="material-symbols-outlined">mail</span>
                 </div>
                 <div>
-                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">Email</h4>
+                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">{t('contact.emailTitle')}</h4>
                   <p className="font-body-lg text-body-lg text-on-surface-variant">
                     hello@azulsurfmirleft.com
                   </p>
@@ -182,7 +185,7 @@ export default function Contact() {
                   <span className="material-symbols-outlined">call</span>
                 </div>
                 <div>
-                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">Phone</h4>
+                  <h4 className="font-label-md text-label-md text-primary uppercase tracking-widest mb-2">{t('contact.phoneTitle')}</h4>
                   <p className="font-body-lg text-body-lg text-on-surface-variant">
                     +212 (0) 528 123 456
                   </p>

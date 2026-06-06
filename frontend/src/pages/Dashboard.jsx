@@ -4,11 +4,13 @@ import {
   Clock, CheckCircle2, AlertTriangle, HelpCircle 
 } from 'lucide-react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -17,7 +19,7 @@ export default function Dashboard() {
         setData(response.data.data);
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
-        setError('Could not connect to the administration API database.');
+        setError(t('dashboard.apiError'));
       } finally {
         setLoading(false);
       }
@@ -29,7 +31,7 @@ export default function Dashboard() {
     return (
       <div className="flex justify-center items-center py-20 text-slate-500">
         <Clock className="animate-spin text-sky-600 h-8 w-8 mr-3" />
-        <span className="font-semibold text-sm">Gathering administrative records...</span>
+        <span className="font-semibold text-sm">{t('dashboard.gatheringRecords')}</span>
       </div>
     );
   }
@@ -39,21 +41,21 @@ export default function Dashboard() {
       <div className="bg-rose-50 border border-rose-200 text-rose-800 p-6 rounded-2xl flex items-center space-x-4 max-w-xl mx-auto mt-6">
         <AlertTriangle className="text-rose-500 shrink-0 h-10 w-10" />
         <div>
-          <h4 className="font-bold text-sm">Connection Warning</h4>
+          <h4 className="font-bold text-sm">{t('dashboard.connectionWarning')}</h4>
           <p className="text-xs text-rose-600 mt-1">{error}</p>
-          <p className="text-[10px] text-rose-500 mt-2">Ensure the Laravel backend development server is running on port 8000.</p>
+          <p className="text-[10px] text-rose-500 mt-2">{t('dashboard.ensureBackend')}</p>
         </div>
       </div>
     );
   }
 
   const statCards = [
-    { title: 'Total Packages', value: data?.total_packages || 0, icon: Package, color: 'bg-blue-500' },
-    { title: 'Surf Lesson Types', value: data?.total_surf_lessons || 0, icon: Shield, color: 'bg-indigo-500' },
-    { title: 'Camp Rooms types', value: data?.total_rooms || 0, icon: BedDouble, color: 'bg-teal-500' },
-    { title: 'Guiding Services', value: data?.total_guiding_services || 0, icon: Compass, color: 'bg-emerald-500' },
-    { title: 'Reviews Total', value: data?.total_reviews || 0, icon: Star, color: 'bg-amber-500' },
-    { title: 'Unread Messages', value: data?.unread_contacts || 0, icon: Mail, color: 'bg-rose-500', alert: (data?.unread_contacts || 0) > 0 },
+    { title: t('dashboard.totalPackages'), value: data?.total_packages || 0, icon: Package, color: 'bg-blue-500' },
+    { title: t('dashboard.surfLessonTypes'), value: data?.total_surf_lessons || 0, icon: Shield, color: 'bg-indigo-500' },
+    { title: t('dashboard.campRoomTypes'), value: data?.total_rooms || 0, icon: BedDouble, color: 'bg-teal-500' },
+    { title: t('dashboard.guidingServices'), value: data?.total_guiding_services || 0, icon: Compass, color: 'bg-emerald-500' },
+    { title: t('dashboard.reviewsTotal'), value: data?.total_reviews || 0, icon: Star, color: 'bg-amber-500' },
+    { title: t('dashboard.unreadMessages'), value: data?.unread_contacts || 0, icon: Mail, color: 'bg-rose-500', alert: (data?.unread_contacts || 0) > 0 },
   ];
 
   return (
@@ -61,8 +63,8 @@ export default function Dashboard() {
       {/* Introduction Banner */}
       <div className="bg-white border border-slate-200/80 p-6 rounded-3xl flex justify-between items-center shadow-xs">
         <div>
-          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome to Azul Surf Console</h3>
-          <p className="text-slate-500 text-xs mt-1">Real-time statistics overview and content control panels.</p>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{t('dashboard.welcomeTitle')}</h3>
+          <p className="text-slate-500 text-xs mt-1">{t('dashboard.welcomeSubtitle')}</p>
         </div>
       </div>
 
@@ -85,7 +87,7 @@ export default function Dashboard() {
                 </span>
                 {card.alert && (
                   <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md mt-2">
-                    Action Required
+                    {t('dashboard.actionRequired')}
                   </span>
                 )}
               </div>
@@ -98,7 +100,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-xs">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-            <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider">Bookings Action Queue</h4>
+            <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider">{t('dashboard.bookingsQueue')}</h4>
             <HelpCircle size={16} className="text-slate-450" />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -107,14 +109,14 @@ export default function Dashboard() {
               <span className="text-2xl font-black text-slate-900 tracking-tight block">
                 {data?.pending_reservations || 0}
               </span>
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Pending Bookings</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('dashboard.pendingBookings')}</span>
             </div>
             <div className="bg-emerald-50/50 border border-emerald-200/60 p-5 rounded-2xl text-center">
               <CheckCircle2 className="text-emerald-500 mx-auto mb-2" size={24} />
               <span className="text-2xl font-black text-slate-900 tracking-tight block">
                 {data?.confirmed_reservations || 0}
               </span>
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Confirmed Bookings</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('dashboard.confirmedBookings')}</span>
             </div>
           </div>
         </div>
@@ -123,13 +125,13 @@ export default function Dashboard() {
         <div className="bg-sky-950 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
           <div className="space-y-3 relative z-10">
-            <h4 className="font-bold text-sm uppercase tracking-wider text-sky-350">Quick Reference</h4>
+            <h4 className="font-bold text-sm uppercase tracking-wider text-sky-350">{t('dashboard.quickReference')}</h4>
             <p className="text-slate-300 text-xs leading-relaxed">
-              Use the sidebar to edit packages, active lesson categories, available camp rooms, guiding service details, and read customer inquiries.
+              {t('dashboard.quickReferenceDesc')}
             </p>
           </div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-sky-400 mt-6 relative z-10">
-            Azul Surf Morocco Systems
+            {t('dashboard.systemsLabel')}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Package, Plus, Edit, Trash2, Loader2, X, Image as ImageIcon,
   Check, AlertCircle, Info, Eye, EyeOff, Globe, Sparkles
@@ -7,6 +8,7 @@ import {
 import api from '../../services/api';
 
 export default function AdminPackages() {
+  const { t } = useTranslation();
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -65,7 +67,7 @@ export default function AdminPackages() {
       }
     } catch (err) {
       console.error('Fetch packages error:', err);
-      setError('Impossible de charger les packages. Veuillez réessayer.');
+      setError(t('adminPackages.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,7 @@ export default function AdminPackages() {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        setError("L'image est trop volumineuse. Taille maximale autorisée: 2 Mo.");
+        setError(t('adminPackages.sizeError'));
         return;
       }
       setImageFile(file);
@@ -144,12 +146,12 @@ export default function AdminPackages() {
 
     // Validations
     if (!titleFr.trim() && !titleEn.trim()) {
-      setError('Veuillez renseigner au moins un titre (FR ou EN).');
+      setError(t('adminPackages.titleRequired'));
       setSubmitLoading(false);
       return;
     }
     if (!price || isNaN(price) || Number(price) < 0) {
-      setError('Veuillez saisir un prix valide supérieur ou égal à 0.');
+      setError(t('adminPackages.priceRequired'));
       setSubmitLoading(false);
       return;
     }
@@ -191,7 +193,7 @@ export default function AdminPackages() {
             'Content-Type': 'multipart/form-data',
           },
         });
-        setSuccess('Package mis à jour avec succès.');
+        setSuccess(t('adminPackages.updateSuccess'));
       } else {
         // Create Mode: POST
         response = await api.post('/admin/packages', formData, {
@@ -199,7 +201,7 @@ export default function AdminPackages() {
             'Content-Type': 'multipart/form-data',
           },
         });
-        setSuccess('Package créé avec succès.');
+        setSuccess(t('adminPackages.createSuccess'));
       }
 
       // Refresh data
@@ -231,11 +233,11 @@ export default function AdminPackages() {
     
     try {
       await api.delete(`/admin/packages/${packageToDelete.id}`);
-      setSuccess('Package supprimé avec succès.');
+      setSuccess(t('adminPackages.deleteSuccess'));
       fetchPackages();
     } catch (err) {
       console.error('Delete package error:', err);
-      setError('Erreur lors de la suppression du package.');
+      setError(t('adminPackages.deleteError'));
     } finally {
       setDeleteLoadingId(null);
       setPackageToDelete(null);
@@ -247,15 +249,15 @@ export default function AdminPackages() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-200/50">
         <div>
-          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">Gestion des Packages</h2>
-          <p className="text-xs text-slate-400 mt-1">Créez et modifiez les formules tout-inclus d'Azul Surf.</p>
+          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">{t('adminPackages.title')}</h2>
+          <p className="text-xs text-slate-400 mt-1">{t('adminPackages.subtitle')}</p>
         </div>
         <button
           onClick={openCreateModal}
           className="inline-flex items-center gap-2 bg-[#E76F51] hover:bg-[#d46247] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-[#E76F51]/15 hover:shadow-lg cursor-pointer border-none"
         >
           <Plus size={16} />
-          <span>Ajouter un Package</span>
+          <span>{t('adminPackages.addPackage')}</span>
         </button>
       </header>
 
@@ -295,7 +297,7 @@ export default function AdminPackages() {
       {/* Main Content Card */}
       <div className="bg-white border border-slate-200/80 shadow-xs rounded-3xl overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h3 className="font-semibold text-[#004655] text-sm">Packages disponibles ({packages.length})</h3>
+          <h3 className="font-semibold text-[#004655] text-sm">{t('adminPackages.availablePackages')} ({packages.length})</h3>
           <span className="bg-[#004655]/5 text-[#004655] px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">
             CMS Actif
           </span>
@@ -306,23 +308,23 @@ export default function AdminPackages() {
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Loader2 className="animate-spin text-[#E76F51]" size={36} />
-              <p className="text-sm font-medium">Chargement des packages...</p>
+              <p className="text-sm font-medium">{t('adminPackages.loading')}</p>
             </div>
           ) : packages.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Info size={36} className="text-slate-300" />
-              <p className="text-sm font-medium">Aucun package configuré. Cliquez sur "Ajouter un Package" pour commencer.</p>
+              <p className="text-sm font-medium">{t('adminPackages.emptyState')}</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-4 w-24">Image</th>
-                  <th className="px-6 py-4">Titre / Description</th>
-                  <th className="px-6 py-4">Durée</th>
-                  <th className="px-6 py-4">Prix</th>
-                  <th className="px-6 py-4">Statut</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 w-24">{t('adminPackages.colImage')}</th>
+                  <th className="px-6 py-4">{t('adminPackages.colTitle')}</th>
+                  <th className="px-6 py-4">{t('adminPackages.colDuration')}</th>
+                  <th className="px-6 py-4">{t('adminPackages.colPrice')}</th>
+                  <th className="px-6 py-4">{t('adminPackages.colStatus')}</th>
+                  <th className="px-6 py-4 text-right">{t('adminPackages.colActions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -346,10 +348,10 @@ export default function AdminPackages() {
                     {/* Title & Desc */}
                     <td className="px-6 py-4 max-w-sm">
                       <div className="font-semibold text-[#004655]">
-                        {pkg.title?.fr || pkg.title?.en || 'Titre non défini'}
+                        {pkg.title?.fr || pkg.title?.en || t('adminPackages.untitled')}
                       </div>
                       <p className="text-xs text-slate-400 truncate mt-0.5" title={pkg.description?.fr || pkg.description?.en}>
-                        {pkg.description?.fr || pkg.description?.en || 'Aucune description'}
+                        {pkg.description?.fr || pkg.description?.en || t('adminPackages.noDescription')}
                       </p>
                     </td>
 
@@ -370,7 +372,7 @@ export default function AdminPackages() {
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                           : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}>
-                        {pkg.is_active ? 'Actif' : 'Inactif'}
+                        {pkg.is_active ? t('adminPackages.statusActive') : t('adminPackages.statusInactive')}
                       </span>
                     </td>
 
@@ -432,7 +434,7 @@ export default function AdminPackages() {
                 <div>
                   <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
                     <Sparkles className="text-[#E76F51] h-5 w-5" />
-                    {selectedPackage ? 'Modifier le Surf Package' : 'Créer un Surf Package'}
+                    {selectedPackage ? t('adminPackages.editPackage') : t('adminPackages.createPackageTitle')}
                   </h3>
                   <p className="text-[10px] text-white/60 uppercase tracking-widest mt-0.5">
                     {selectedPackage ? `Package ID: #${selectedPackage.id}` : 'Nouvelle offre Azul Surf'}
@@ -460,7 +462,7 @@ export default function AdminPackages() {
                     }`}
                   >
                     <Globe size={12} />
-                    <span>Contenu Français (FR)</span>
+                    <span>{t('adminPackages.langFr')}</span>
                   </button>
                   <button
                     type="button"
@@ -472,7 +474,7 @@ export default function AdminPackages() {
                     }`}
                   >
                     <Globe size={12} />
-                    <span>Contenu Anglais (EN)</span>
+                    <span>{t('adminPackages.langEn')}</span>
                   </button>
                 </div>
 
@@ -482,23 +484,23 @@ export default function AdminPackages() {
                     <>
                       {/* Title FR */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Titre du Package (FR)</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.titleFr')}</label>
                         <input
                           type="text"
                           value={titleFr}
                           onChange={(e) => setTitleFr(e.target.value)}
-                          placeholder="Ex: Package Surf & Yoga Tout-Inclus"
+                          placeholder={t('adminPackages.titleFrPlaceholder')}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                         />
                       </div>
                       {/* Description FR */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description (FR)</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.descFr')}</label>
                         <textarea
                           rows={3}
                           value={descriptionFr}
                           onChange={(e) => setDescriptionFr(e.target.value)}
-                          placeholder="Décrivez l'offre, l'ambiance, l'hébergement, la restauration..."
+                          placeholder={t('adminPackages.descFrPlaceholder')}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                         />
                       </div>
@@ -507,23 +509,23 @@ export default function AdminPackages() {
                     <>
                       {/* Title EN */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Package Title (EN)</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.titleEn')}</label>
                         <input
                           type="text"
                           value={titleEn}
                           onChange={(e) => setTitleEn(e.target.value)}
-                          placeholder="Ex: All-Inclusive Surf & Yoga Package"
+                          placeholder={t('adminPackages.titleEnPlaceholder')}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                         />
                       </div>
                       {/* Description EN */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description (EN)</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.descEn')}</label>
                         <textarea
                           rows={3}
                           value={descriptionEn}
                           onChange={(e) => setDescriptionEn(e.target.value)}
-                          placeholder="Describe the offer, details, villa experience, meals..."
+                          placeholder={t('adminPackages.descEnPlaceholder')}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                         />
                       </div>
@@ -534,18 +536,18 @@ export default function AdminPackages() {
                 {/* Grid Fields (Duration & Price) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Durée (ex: 7 jours / 6 nuits)</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.duration')}</label>
                     <input
                       type="text"
                       required
                       value={duration}
                       onChange={(e) => setDuration(e.target.value)}
-                      placeholder="Ex: 7 jours / 6 nuits"
+                      placeholder={t('adminPackages.durationPlaceholder')}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tarif (EUR €)</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.price')}</label>
                     <input
                       type="number"
                       required
@@ -553,7 +555,7 @@ export default function AdminPackages() {
                       step="any"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      placeholder="Ex: 850"
+                      placeholder={t('adminPackages.pricePlaceholder')}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#004655]/20 focus:border-[#004655] text-sm text-slate-800"
                     />
                   </div>
@@ -563,7 +565,7 @@ export default function AdminPackages() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   {/* Image Upload */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Image du Package</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">{t('adminPackages.packageImage')}</label>
                     
                     <div 
                       onClick={() => fileInputRef.current?.click()}
@@ -573,14 +575,14 @@ export default function AdminPackages() {
                         <>
                           <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <span className="text-white text-xs font-semibold">Changer d'image</span>
+                            <span className="text-white text-xs font-semibold">{t('adminPackages.changeImage')}</span>
                           </div>
                         </>
                       ) : (
                         <div className="space-y-1">
                           <ImageIcon className="text-slate-400 mx-auto h-8 w-8" />
-                          <p className="text-[11px] text-slate-500 font-medium">Glissez une image ou cliquez pour téléverser</p>
-                          <p className="text-[9px] text-slate-400">JPEG, PNG ou WEBP (Max 2 Mo)</p>
+                          <p className="text-[11px] text-slate-500 font-medium">{t('adminPackages.uploadImage')}</p>
+                          <p className="text-[9px] text-slate-400">{t('adminPackages.imageSize')}</p>
                         </div>
                       )}
                     </div>
@@ -597,8 +599,8 @@ export default function AdminPackages() {
                   <div className="space-y-4 pt-4">
                     <div className="flex items-center justify-between p-4 bg-[#004655]/5 rounded-2xl border border-[#004655]/10">
                       <div>
-                        <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">Statut Actif</span>
-                        <span className="text-[10px] text-slate-500">Rendre visible sur le site public</span>
+                        <span className="text-xs font-bold text-[#004655] uppercase tracking-wider block">{t('adminPackages.statusActiveToggle')}</span>
+                        <span className="text-[10px] text-slate-500">{t('adminPackages.statusVisible')}</span>
                       </div>
                       <button
                         type="button"
@@ -621,7 +623,7 @@ export default function AdminPackages() {
                 {/* Included Services List */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Services Inclus</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t('adminPackages.includedServices')}</label>
                     <button
                       type="button"
                       onClick={addServiceField}
@@ -638,7 +640,7 @@ export default function AdminPackages() {
                           type="text"
                           value={service}
                           onChange={(e) => handleServiceChange(index, e.target.value)}
-                          placeholder="Ex: Coaching certifié ISA quotidien"
+                          placeholder={t('adminPackages.servicePlaceholder')}
                           className="flex-1 px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#004655] text-xs text-slate-700"
                         />
                         <button
@@ -670,10 +672,10 @@ export default function AdminPackages() {
                     {submitLoading ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        <span>Enregistrement...</span>
+                        <span>{t('adminPackages.saving')}</span>
                       </>
                     ) : (
-                      <span>Enregistrer le Package</span>
+                      <span>{t('adminPackages.savePackage')}</span>
                     )}
                   </button>
                 </div>
@@ -707,9 +709,9 @@ export default function AdminPackages() {
                 <Trash2 size={20} />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-base font-bold text-slate-900">Supprimer ce Surf Package ?</h3>
+                <h3 className="text-base font-bold text-slate-900">{t('adminPackages.deleteConfirmTitle')}</h3>
                 <p className="text-xs text-slate-500">
-                  Êtes-vous sûr de vouloir supprimer le package <span className="font-semibold text-slate-700">"{packageToDelete?.title?.fr || packageToDelete?.title?.en || packageToDelete?.title}"</span> ? Cette action est irréversible.
+                  {t('adminPackages.deleteConfirmDesc')} <span className="font-semibold text-slate-700">"{packageToDelete?.title?.fr || packageToDelete?.title?.en || packageToDelete?.title}"</span> ? {t('adminPackages.deleteConfirmWarning')}
                 </p>
               </div>
               <div className="flex gap-3 justify-center pt-2">

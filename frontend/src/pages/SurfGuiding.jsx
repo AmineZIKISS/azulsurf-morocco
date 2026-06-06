@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
+import { useTranslation } from 'react-i18next';
 
 export default function SurfGuiding() {
   const { openBookingModal } = useBooking();
+  const { t } = useTranslation();
+
   return (
     <main>
       {/* Hero Section */}
@@ -17,8 +20,8 @@ export default function SurfGuiding() {
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
         <div className="relative z-10 text-center px-margin-mobile md:px-margin-desktop max-w-[800px] mx-auto text-white">
-          <h1 className="font-display-lg text-display-lg mb-6 drop-shadow-lg">Beyond the Known: Surf Guiding in Mirleft</h1>
-          <p className="font-body-lg text-body-lg text-white/90 drop-shadow-md">Let our local experts lead you to the most pristine, uncrowded waves along the Atlantic coast.</p>
+          <h1 className="font-display-lg text-display-lg mb-6 drop-shadow-lg">{t('surfGuiding.heroTitle')}</h1>
+          <p className="font-body-lg text-body-lg text-white/90 drop-shadow-md">{t('surfGuiding.heroSubtitle')}</p>
         </div>
       </section>
 
@@ -33,25 +36,25 @@ export default function SurfGuiding() {
             />
           </div>
           <div className="order-1 md:order-2 space-y-8">
-            <h2 className="font-headline-lg text-headline-lg text-primary">The Azul Approach</h2>
+            <h2 className="font-headline-lg text-headline-lg text-primary">{t('surfGuiding.approachTitle')}</h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-              Surf guiding at Azul is more than just transportation; it's about unlocking the secrets of the Moroccan coast. Our philosophy is rooted in deep local knowledge, respect for the ocean, and a commitment to curating the perfect session for your ability level.
+              {t('surfGuiding.approachP1')}
             </p>
             <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-              We obsess over the charts, understanding how every subtle shift in swell direction, tide, and wind affects the myriad of reefs, points, and beach breaks hidden along our shoreline. Whether you seek peeling point breaks or punchy wedges, we ensure you are in the right place at the exact right time.
+              {t('surfGuiding.approachP2')}
             </p>
             <ul className="space-y-4 pt-4">
               <li className="flex items-start">
                 <span className="material-symbols-outlined text-primary mr-4 mt-1">schedule</span>
-                <span className="font-body-md text-body-md text-on-surface-variant">Tide-perfect timing for optimal wave quality.</span>
+                <span className="font-body-md text-body-md text-on-surface-variant">{t('surfGuiding.tidePerfect')}</span>
               </li>
               <li className="flex items-start">
                 <span className="material-symbols-outlined text-primary mr-4 mt-1">explore</span>
-                <span className="font-body-md text-body-md text-on-surface-variant">Exclusive access to uncrowded, off-the-radar spots.</span>
+                <span className="font-body-md text-body-md text-on-surface-variant">{t('surfGuiding.exclusiveAccess')}</span>
               </li>
               <li className="flex items-start">
                 <span className="material-symbols-outlined text-primary mr-4 mt-1">person_search</span>
-                <span className="font-body-md text-body-md text-on-surface-variant">Tailored wave selection matching your skill and style.</span>
+                <span className="font-body-md text-body-md text-on-surface-variant">{t('surfGuiding.tailoredWaves')}</span>
               </li>
             </ul>
           </div>
@@ -61,13 +64,13 @@ export default function SurfGuiding() {
       {/* Call to Action */}
       <section className="py-section-padding px-margin-mobile md:px-margin-desktop bg-surface-container-low border-t border-surface-variant">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="font-headline-lg text-headline-lg text-primary">Join the Search</h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">Ready to discover the hidden gems of the Moroccan coastline? Book your premium surf guiding package today.</p>
+          <h2 className="font-headline-lg text-headline-lg text-primary">{t('surfGuiding.ctaTitle')}</h2>
+          <p className="font-body-lg text-body-lg text-on-surface-variant">{t('surfGuiding.ctaSubtitle')}</p>
           <button 
             onClick={() => openBookingModal('Surf Guiding Package')}
             className="inline-block bg-[#E76F51] text-white px-8 py-4 font-label-md text-label-md uppercase tracking-wider rounded-DEFAULT hover:bg-[#d55e42] transition-all shadow-[0_4px_14px_0_rgba(231,111,81,0.25)] hover:shadow-[0_6px_20px_rgba(231,111,81,0.23)] hover:-translate-y-0.5 text-center cursor-pointer"
           >
-            Book Your Guide
+            {t('surfGuiding.ctaButton')}
           </button>
         </div>
       </section>

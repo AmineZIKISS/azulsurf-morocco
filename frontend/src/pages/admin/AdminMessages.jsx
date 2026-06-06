@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Mail, Eye, Trash2, Loader2, X, AlertCircle, Info, Check,
   Phone, Calendar, User, Sparkles
@@ -7,6 +8,7 @@ import {
 import api from '../../services/api';
 
 export default function AdminMessages() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detailLoadingId, setDetailLoadingId] = useState(null);
@@ -45,7 +47,7 @@ export default function AdminMessages() {
       }
     } catch (err) {
       console.error('Fetch messages error:', err);
-      setError('Impossible de charger les messages. Veuillez réessayer.');
+      setError(t('adminMessages.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ export default function AdminMessages() {
       }
     } catch (err) {
       console.error('Fetch message detail error:', err);
-      setError('Erreur lors du chargement des détails du message.');
+      setError(t('adminMessages.detailError'));
     } finally {
       setDetailLoadingId(null);
     }
@@ -89,14 +91,14 @@ export default function AdminMessages() {
     
     try {
       await api.delete(`/admin/contacts/${messageToDelete.id}`);
-      setSuccess('Message supprimé avec succès.');
+      setSuccess(t('adminMessages.deleteSuccess'));
       fetchMessages();
       if (selectedMessage?.id === messageToDelete.id) {
         setIsDetailOpen(false);
       }
     } catch (err) {
       console.error('Delete message error:', err);
-      setError('Erreur lors de la suppression du message.');
+      setError(t('adminMessages.deleteError'));
     } finally {
       setDeleteLoadingId(null);
       setMessageToDelete(null);
@@ -108,8 +110,8 @@ export default function AdminMessages() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-200/50">
         <div>
-          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">Messages de Contact</h2>
-          <p className="text-xs text-slate-400 mt-1">Lisez et gérez les demandes d'informations reçues via le formulaire du site.</p>
+          <h2 className="font-headline-md text-3xl font-bold text-[#004655]">{t('adminMessages.title')}</h2>
+          <p className="text-xs text-slate-400 mt-1">{t('adminMessages.subtitle')}</p>
         </div>
         <button
           onClick={fetchMessages}
@@ -117,7 +119,7 @@ export default function AdminMessages() {
           className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-semibold text-sm transition-all border border-slate-200 cursor-pointer disabled:opacity-75"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <Calendar size={16} />}
-          <span>Actualiser</span>
+          <span>{t('adminMessages.refresh')}</span>
         </button>
       </header>
 
@@ -155,7 +157,7 @@ export default function AdminMessages() {
 
       <div className="bg-white border border-slate-200/80 shadow-xs rounded-3xl overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h3 className="font-semibold text-[#004655] text-sm">Boîte de réception ({messages.length} messages)</h3>
+          <h3 className="font-semibold text-[#004655] text-sm">{t('adminMessages.inbox')} ({messages.length} messages)</h3>
           <span className="bg-[#004655]/5 text-[#004655] px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">
             Boîte active
           </span>
@@ -165,22 +167,22 @@ export default function AdminMessages() {
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Loader2 className="animate-spin text-[#E76F51]" size={36} />
-              <p className="text-sm font-medium">Chargement de la boîte de réception...</p>
+              <p className="text-sm font-medium">{t('adminMessages.loading')}</p>
             </div>
           ) : messages.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Info size={36} className="text-slate-300" />
-              <p className="text-sm font-medium">Aucun message de contact reçu.</p>
+              <p className="text-sm font-medium">{t('adminMessages.emptyState')}</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-4 w-28">Statut</th>
-                  <th className="px-6 py-4">Expéditeur</th>
-                  <th className="px-6 py-4">Sujet / Intérêt</th>
-                  <th className="px-6 py-4">Date de réception</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 w-28">{t('adminMessages.colStatus')}</th>
+                  <th className="px-6 py-4">{t('adminMessages.colSender')}</th>
+                  <th className="px-6 py-4">{t('adminMessages.colSubject')}</th>
+                  <th className="px-6 py-4">{t('adminMessages.colDate')}</th>
+                  <th className="px-6 py-4 text-right">{t('adminMessages.colActions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
@@ -192,7 +194,7 @@ export default function AdminMessages() {
                           ? 'bg-slate-100 text-slate-500 border-slate-200' 
                           : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
-                        {msg.is_read ? 'Lu' : 'Non lu'}
+                        {msg.is_read ? t('adminMessages.read') : t('adminMessages.unread')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -200,10 +202,10 @@ export default function AdminMessages() {
                       <div className="text-xs text-slate-400 font-normal">{msg.email}</div>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
-                      <div className="truncate text-slate-700">{msg.subject || 'Aucun objet'}</div>
+                      <div className="truncate text-slate-700">{msg.subject || t('adminMessages.noSubject')}</div>
                       {msg.selected_service && (
                         <span className="text-[10px] text-[#E76F51] bg-[#E76F51]/5 border border-[#E76F51]/10 px-1.5 py-0.5 rounded mt-1 inline-block">
-                          Intérêt: {msg.selected_service}
+                          {t('adminMessages.interest')} {msg.selected_service}
                         </span>
                       )}
                     </td>
@@ -227,14 +229,14 @@ export default function AdminMessages() {
                             <button
                               onClick={() => openDetailModal(msg)}
                               className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-[#004655] border border-slate-200 transition-colors cursor-pointer"
-                              title="Lire le message"
+                              title={t('adminMessages.readMessage')}
                             >
                               <Eye size={14} />
                             </button>
                             <button
                               onClick={() => triggerDeleteConfirm(msg)}
                               className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer"
-                              title="Supprimer"
+                              title={t('adminMessages.delete')}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -273,9 +275,9 @@ export default function AdminMessages() {
                 <div className="flex items-center gap-2">
                   <Mail className="text-[#E76F51] h-5 w-5" />
                   <div>
-                    <h3 className="text-base font-bold tracking-tight">Lecture du Message</h3>
+                    <h3 className="text-base font-bold tracking-tight">{t('adminMessages.readingMessage')}</h3>
                     <p className="text-[10px] text-white/60 uppercase tracking-widest mt-0.5">
-                      Date: {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
+                      {t('adminMessages.date')} {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
                     </p>
                   </div>
                 </div>
@@ -314,7 +316,7 @@ export default function AdminMessages() {
                 {/* Service Interest */}
                 {selectedMessage.selected_service && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Service d'intérêt:</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('adminMessages.serviceInterest')}</span>
                     <span className="bg-[#E76F51]/10 text-[#E76F51] font-semibold text-xs px-2.5 py-0.5 rounded-lg border border-[#E76F51]/20">
                       {selectedMessage.selected_service}
                     </span>
@@ -323,7 +325,7 @@ export default function AdminMessages() {
 
                 {/* Subject */}
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Sujet</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('adminMessages.subject')}</span>
                   <div className="font-semibold text-[#004655] text-base border-b border-slate-100 pb-2">
                     {selectedMessage.subject || 'Aucun objet'}
                   </div>
@@ -331,7 +333,7 @@ export default function AdminMessages() {
 
                 {/* Body Content */}
                 <div className="space-y-1.5">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Message</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('adminMessages.message')}</span>
                   <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-line text-xs">
                     {selectedMessage.message}
                   </div>
@@ -381,9 +383,9 @@ export default function AdminMessages() {
                 <Trash2 size={20} />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-base font-bold text-slate-900">Supprimer le Message ?</h3>
+                <h3 className="text-base font-bold text-slate-900">{t('adminMessages.deleteConfirmTitle')}</h3>
                 <p className="text-xs text-slate-500">
-                  Voulez-vous vraiment supprimer définitivement ce message de <span className="font-semibold text-slate-700">"{messageToDelete?.full_name}"</span> ? cette action est irréversible.
+                  {t('adminMessages.deleteConfirmDesc')} <span className="font-semibold text-slate-700">"{messageToDelete?.full_name}"</span> ? {t('adminMessages.deleteConfirmWarning')}
                 </p>
               </div>
               <div className="flex gap-3 justify-center pt-2">

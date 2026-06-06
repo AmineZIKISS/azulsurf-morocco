@@ -5,11 +5,13 @@ import {
   Image, Star, Mail, Settings, LogOut, Waves, User, Menu, X 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLayout({ children }) {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const { t } = useTranslation();
 
   // Authorization Protection
   if (loading) {
@@ -17,7 +19,7 @@ export default function AdminLayout({ children }) {
       <div className="min-h-screen bg-slate-900 flex justify-center items-center text-white">
         <div className="flex flex-col items-center space-y-4">
           <Waves className="animate-spin text-sky-500 h-10 w-10" />
-          <p className="text-sm font-medium tracking-wide">Verifying authorization...</p>
+          <p className="text-sm font-medium tracking-wide">{t('adminLayout.verifying')}</p>
         </div>
       </div>
     );
@@ -28,12 +30,12 @@ export default function AdminLayout({ children }) {
   }
 
   const menuItems = [
-    { name: 'Réservations', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Packages', path: '/admin/packages', icon: Package },
-    { name: 'Galerie', path: '/admin/gallery', icon: Image },
-    { name: 'Avis Clients', path: '/admin/reviews', icon: Star },
-    { name: 'Messages Inbox', path: '/admin/contacts', icon: Mail },
-    { name: 'Paramètres', path: '/admin/settings', icon: Settings },
+    { name: t('adminLayout.reservations'), path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: t('adminLayout.packages'), path: '/admin/packages', icon: Package },
+    { name: t('adminLayout.gallery'), path: '/admin/gallery', icon: Image },
+    { name: t('adminLayout.reviews'), path: '/admin/reviews', icon: Star },
+    { name: t('adminLayout.messagesInbox'), path: '/admin/contacts', icon: Mail },
+    { name: t('adminLayout.settings'), path: '/admin/settings', icon: Settings },
   ];
 
   const handleLogout = async () => {
@@ -71,7 +73,7 @@ export default function AdminLayout({ children }) {
               </div>
               <div>
                 <span className="font-bold text-white text-base tracking-tight block">Azul Surf</span>
-                <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Admin Console</span>
+                <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold">{t('adminLayout.adminConsole')}</span>
               </div>
             </div>
             {/* Close Mobile Sidebar */}
@@ -130,7 +132,7 @@ export default function AdminLayout({ children }) {
             className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-white/5 hover:text-white text-white/80 transition-colors border-none bg-transparent cursor-pointer text-left"
           >
             <LogOut size={18} className="text-white/60" />
-            <span>Se déconnecter</span>
+            <span>{t('adminLayout.logout')}</span>
           </button>
         </div>
       </aside>

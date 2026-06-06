@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Waves, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import api, { getCsrfCookie } from '../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function Login() {
     setError('');
 
     if (!email || !password) {
-      setError('Veuillez remplir tous les champs.');
+      setError(t('login.fillAllFields'));
       return;
     }
 
@@ -43,7 +45,7 @@ export default function Login() {
       navigate('/admin/dashboard');
     } catch (err) {
       console.error('Admin login error:', err);
-      const msg = err.response?.data?.message || 'Identifiants de connexion invalides.';
+      const msg = err.response?.data?.message || t('login.invalidCredentials');
       setError(msg);
     } finally {
       setLoading(false);
@@ -85,10 +87,10 @@ export default function Login() {
               <Waves size={28} className="text-white" />
             </motion.div>
             <h1 className="text-2xl font-bold tracking-tight text-[#0A3F5C]">
-              Portail d'Administration
+              {t('login.portalTitle')}
             </h1>
             <p className="text-slate-400 text-xs mt-1.5 uppercase tracking-[0.2em] font-semibold">
-              Azul Surf Morocco
+              {t('login.brandName')}
             </p>
           </div>
 
@@ -127,7 +129,7 @@ export default function Login() {
                   peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
                   peer-focus:text-[10px] peer-focus:font-bold peer-focus:text-[#E76F51] peer-focus:top-2 peer-focus:translate-y-0"
               >
-                Adresse Email
+                {t('login.emailLabel')}
               </label>
             </div>
 
@@ -152,7 +154,7 @@ export default function Login() {
                   peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
                   peer-focus:text-[10px] peer-focus:font-bold peer-focus:text-[#E76F51] peer-focus:top-2 peer-focus:translate-y-0"
               >
-                Mot de Passe
+                {t('login.passwordLabel')}
               </label>
             </div>
 
@@ -167,10 +169,10 @@ export default function Login() {
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Connexion en cours…</span>
+                  <span>{t('login.loggingIn')}</span>
                 </>
               ) : (
-                <span>Se Connecter</span>
+                <span>{t('login.loginButton')}</span>
               )}
             </motion.button>
           </form>
@@ -178,15 +180,15 @@ export default function Login() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-7">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Espace sécurisé</span>
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">{t('login.secureSpace')}</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           {/* Footer Note */}
           <p className="text-center text-[11px] text-slate-400 leading-relaxed">
-            Accès réservé aux administrateurs autorisés.
+            {t('login.accessRestricted')}
             <br />
-            © {new Date().getFullYear()} Azul Surf Morocco — Mirleft, Maroc
+            {t('login.copyright', { year: new Date().getFullYear() })}
           </p>
         </div>
       </motion.div>

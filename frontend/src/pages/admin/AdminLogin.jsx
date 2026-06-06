@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
 import api, { getCsrfCookie } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,7 +37,7 @@ export default function AdminLogin() {
       navigate('/admin/dashboard');
     } catch (err) {
       console.error('Admin login error:', err);
-      const msg = err.response?.data?.message || 'Identifiants de connexion invalides ou rôle insuffisant.';
+      const msg = err.response?.data?.message || t('adminLogin.invalidCredentials');
       setError(msg);
     } finally {
       setLoading(false);
@@ -59,8 +61,8 @@ export default function AdminLogin() {
           <div className="w-16 h-16 rounded-full bg-[#004655]/5 flex items-center justify-center mx-auto mb-4 text-[#004655]">
             <ShieldAlert size={32} />
           </div>
-          <h2 className="font-headline-md text-2xl font-bold text-[#004655]">Azul Surf Morocco</h2>
-          <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold">Admin Portal</p>
+          <h2 className="font-headline-md text-2xl font-bold text-[#004655]">{t('adminLogin.brandName')}</h2>
+          <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest font-bold">{t('adminLogin.portalLabel')}</p>
         </div>
 
         {/* Errors */}
@@ -96,7 +98,7 @@ export default function AdminLogin() {
                 peer-focus:text-[10px] peer-focus:font-bold peer-focus:text-[#E76F51] peer-focus:translate-y-0 peer-focus:scale-100
                 -translate-y-1 scale-100"
             >
-              Adresse Email
+              {t('adminLogin.emailLabel')}
             </label>
           </div>
 
@@ -119,7 +121,7 @@ export default function AdminLogin() {
                 peer-focus:text-[10px] peer-focus:font-bold peer-focus:text-[#E76F51] peer-focus:translate-y-0 peer-focus:scale-100
                 -translate-y-1 scale-100"
             >
-              Mot de Passe
+              {t('adminLogin.passwordLabel')}
             </label>
           </div>
 
@@ -134,17 +136,17 @@ export default function AdminLogin() {
             {loading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                <span>Connexion en cours...</span>
+                <span>{t('adminLogin.loggingIn')}</span>
               </>
             ) : (
-              <span>Se Connecter</span>
+              <span>{t('adminLogin.loginButton')}</span>
             )}
           </motion.button>
         </form>
 
         {/* Footer info */}
         <div className="text-center mt-8 text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} Azul Surf Morocco • Espace Sécurisé</p>
+          <p>{t('adminLogin.copyright', { year: new Date().getFullYear() })}</p>
         </div>
       </motion.div>
     </div>

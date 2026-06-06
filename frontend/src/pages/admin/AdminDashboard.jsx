@@ -7,6 +7,7 @@ import {
   BedDouble, Compass, Image, Star
 } from 'lucide-react';
 import api from '../../services/api';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminDashboard() {
   const [reservations, setReservations] = useState([]);
@@ -14,6 +15,7 @@ export default function AdminDashboard() {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
@@ -29,7 +31,7 @@ export default function AdminDashboard() {
       setReservations(response.data);
     } catch (err) {
       console.error('Fetch reservations error:', err);
-      setError('Impossible de charger les réservations. Veuillez vérifier votre connexion.');
+      setError(t('adminDashboard.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export default function AdminDashboard() {
       );
     } catch (err) {
       console.error('Update status error:', err);
-      alert('Erreur lors de la mise à jour du statut.');
+      alert(t('adminDashboard.updateError'));
     } finally {
       setActionLoadingId(null);
     }
@@ -95,12 +97,28 @@ export default function AdminDashboard() {
 
   const formatServiceType = (type) => {
     switch (type) {
-      case 'room': return 'Chambre';
-      case 'package': return 'Package';
-      case 'surf_lesson': return 'Cours';
-      case 'guiding': return 'Guidage';
+      case 'room': return t('adminDashboard.serviceRoom');
+      case 'package': return t('adminDashboard.servicePackage');
+      case 'surf_lesson': return t('adminDashboard.serviceLesson');
+      case 'guiding': return t('adminDashboard.serviceGuiding');
       default: return type;
     }
+  };
+
+  const formatStatusLabel = (status) => {
+    switch (status) {
+      case 'Pending': return t('adminDashboard.statusPending');
+      case 'Confirmed': return t('adminDashboard.statusConfirmed');
+      case 'Cancelled': return t('adminDashboard.statusCancelled');
+      default: return status;
+    }
+  };
+
+  // Locale-aware date formatting for the period column
+  const formatPeriodDate = (dateStr) => {
+    const lang = i18n.language?.substring(0, 2) || 'fr';
+    const localeMap = { en: 'en-US', fr: 'fr-FR', es: 'es-ES' };
+    return new Date(dateStr).toLocaleDateString(localeMap[lang] || 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   return (
@@ -108,14 +126,14 @@ export default function AdminDashboard() {
         {/* Header */}
         <header className="flex justify-between items-center mb-8 pb-4 border-b border-slate-200/50">
           <div>
-            <h2 className="font-headline-md text-3xl font-bold text-[#004655]">Tableau de Bord</h2>
-            <p className="text-xs text-slate-400 mt-1">Gérez vos réservations de surf et les clients d'Azul Surf.</p>
+            <h2 className="font-headline-md text-3xl font-bold text-[#004655]">{t('adminDashboard.title')}</h2>
+            <p className="text-xs text-slate-400 mt-1">{t('adminDashboard.subtitle')}</p>
           </div>
           <button 
             onClick={fetchReservations}
             disabled={loading}
             className="p-2.5 rounded-full hover:bg-slate-200/50 transition-colors text-[#004655]"
-            title="Rafraîchir"
+            title={t('adminDashboard.refresh')}
           >
             {loading ? <Loader2 size={20} className="animate-spin" /> : <Calendar size={20} />}
           </button>
@@ -124,7 +142,7 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{t('adminDashboard.total')}</span>
             <div className="flex justify-between items-end mt-2">
               <span className="text-3xl font-bold text-[#004655]">{total}</span>
               <div className="bg-slate-50 p-2 rounded-xl text-slate-500">
@@ -133,7 +151,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider block">En attente</span>
+            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider block">{t('adminDashboard.pending')}</span>
             <div className="flex justify-between items-end mt-2">
               <span className="text-3xl font-bold text-amber-600">{pending}</span>
               <div className="bg-amber-50 p-2 rounded-xl text-amber-500">
@@ -142,7 +160,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
-            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider block">Confirmées</span>
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider block">{t('adminDashboard.confirmed')}</span>
             <div className="flex justify-between items-end mt-2">
               <span className="text-3xl font-bold text-emerald-600">{confirmed}</span>
               <div className="bg-emerald-50 p-2 rounded-xl text-emerald-500">
@@ -151,7 +169,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm">
-            <span className="text-xs font-bold text-rose-500 uppercase tracking-wider block">Annulées</span>
+            <span className="text-xs font-bold text-rose-500 uppercase tracking-wider block">{t('adminDashboard.cancelled')}</span>
             <div className="flex justify-between items-end mt-2">
               <span className="text-3xl font-bold text-rose-600">{cancelled}</span>
               <div className="bg-rose-50 p-2 rounded-xl text-rose-500">
@@ -172,9 +190,9 @@ export default function AdminDashboard() {
         {/* Reservations Table Section */}
         <section className="bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-xl rounded-3xl overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h3 className="font-semibold text-[#004655] text-base">Historique des Réservations</h3>
+            <h3 className="font-semibold text-[#004655] text-base">{t('adminDashboard.reservationHistory')}</h3>
             <span className="bg-[#004655]/5 text-[#004655] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-              {reservations.length} demandes
+              {reservations.length} {t('adminDashboard.requests')}
             </span>
           </div>
 
@@ -182,24 +200,24 @@ export default function AdminDashboard() {
             {loading && reservations.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
                 <Loader2 className="animate-spin text-[#E76F51]" size={36} />
-                <p className="text-sm">Chargement des données...</p>
+                <p className="text-sm">{t('adminDashboard.loadingData')}</p>
               </div>
             ) : reservations.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center text-slate-400 gap-3">
                 <Info size={36} className="text-slate-300" />
-                <p className="text-sm">Aucune demande de réservation trouvée.</p>
+                <p className="text-sm">{t('adminDashboard.noReservations')}</p>
               </div>
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <th className="px-6 py-4">Client</th>
-                    <th className="px-6 py-4">Coordonnées</th>
-                    <th className="px-6 py-4">Service</th>
-                    <th className="px-6 py-4">Période</th>
-                    <th className="px-6 py-4 text-center">Voyageurs</th>
-                    <th className="px-6 py-4">Statut</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="px-6 py-4">{t('adminDashboard.clientCol')}</th>
+                    <th className="px-6 py-4">{t('adminDashboard.contactCol')}</th>
+                    <th className="px-6 py-4">{t('adminDashboard.serviceCol')}</th>
+                    <th className="px-6 py-4">{t('adminDashboard.periodCol')}</th>
+                    <th className="px-6 py-4 text-center">{t('adminDashboard.travelersCol')}</th>
+                    <th className="px-6 py-4">{t('adminDashboard.statusCol')}</th>
+                    <th className="px-6 py-4 text-right">{t('adminDashboard.actionsCol')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -237,7 +255,7 @@ export default function AdminDashboard() {
                       {/* Période */}
                       <td className="px-6 py-4 font-medium text-slate-600">
                         <span className="whitespace-nowrap text-xs">
-                          {new Date(res.check_in).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} — {new Date(res.check_out).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {formatPeriodDate(res.check_in)} — {formatPeriodDate(res.check_out)}
                         </span>
                       </td>
 
@@ -249,7 +267,7 @@ export default function AdminDashboard() {
                       {/* Status */}
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeClass(res.status)}`}>
-                          {res.status === 'Pending' ? 'En attente' : res.status === 'Confirmed' ? 'Confirmé' : 'Annulé'}
+                          {formatStatusLabel(res.status)}
                         </span>
                       </td>
 
@@ -264,7 +282,7 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() => handleUpdateStatus(res.id, 'Confirmed')}
                                   className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 transition-colors cursor-pointer"
-                                  title="Approuver"
+                                  title={t('adminDashboard.approve')}
                                 >
                                   <Check size={14} />
                                 </button>
@@ -273,7 +291,7 @@ export default function AdminDashboard() {
                                 <button
                                   onClick={() => handleUpdateStatus(res.id, 'Cancelled')}
                                   className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-colors cursor-pointer"
-                                  title="Annuler / Rejeter"
+                                  title={t('adminDashboard.reject')}
                                 >
                                   <X size={14} />
                                 </button>

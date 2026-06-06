@@ -3,11 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle, Loader2, ChevronDown, Calendar } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { format, parseISO, startOfDay } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, es, enUS } from 'date-fns/locale';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/datepicker-coastal.css';
-import api from '../services/api';
+import api, { getCsrfCookie } from '../services/api';
 import { useBooking } from '../context/BookingContext';
+import { useTranslation } from 'react-i18next';
+
+// Map i18n language codes to date-fns locale objects
+const dateFnsLocales = { fr, es, en: enUS };
 
 // Reusable Premium Floating Label Input Component
 const FloatingInput = ({ label, id, name, type = 'text', value, onChange, required, disabled, error }) => {
@@ -102,7 +106,7 @@ const ModalDateInput = React.forwardRef(({ value, onClick, placeholder }, ref) =
 ModalDateInput.displayName = 'ModalDateInput';
 
 // ── Compact Calendar Legend container for the modal context ───────────────────
-const ModalCalendarLegend = ({ className, children }) => (
+const ModalCalendarLegend = ({ className, children, t }) => (
   <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(10,63,92,0.12)] overflow-hidden">
     <div className="p-5">
       <div className={className} style={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}>
@@ -112,15 +116,15 @@ const ModalCalendarLegend = ({ className, children }) => (
     <div className="border-t border-slate-100 px-5 py-3 bg-slate-50/60 flex items-center justify-center gap-6">
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full bg-[#F07167] shadow-[0_0_6px_rgba(240,113,103,0.4)] shrink-0" />
-        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">Sélectionné</span>
+        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">{t('booking.calendarSelected')}</span>
       </div>
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#0A3F5C] bg-transparent shrink-0" />
-        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">Aujourd'hui</span>
+        <span className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">{t('booking.calendarToday')}</span>
       </div>
       <div className="flex items-center gap-2">
         <span className="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-300 shrink-0" />
-        <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider line-through">Réservé</span>
+        <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider line-through">{t('booking.calendarBooked')}</span>
       </div>
     </div>
   </div>
@@ -128,6 +132,9 @@ const ModalCalendarLegend = ({ className, children }) => (
 
 export default function BookingModal() {
   const { isBookingModalOpen: isOpen, closeBookingModal: onClose, selectedService, initialData } = useBooking();
+  const { t, i18n } = useTranslation();
+  const currentLocale = dateFnsLocales[i18n.language?.substring(0, 2)] || fr;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -163,12 +170,14 @@ export default function BookingModal() {
     { value: 'Full Surf Package',                      label: 'Full Surf Package',                      service_type: 'package' },
   ];
 
-  // Format dates to friendly French (accepts Date objects or ISO strings)
-  const formatDateFrench = (dateVal) => {
+  // Format dates to locale-aware friendly text (accepts Date objects or ISO strings)
+  const formatDateLocale = (dateVal) => {
     if (!dateVal) return '';
     const date = dateVal instanceof Date ? dateVal : new Date(dateVal);
     if (isNaN(date.getTime())) return String(dateVal);
-    return date.toLocaleDateString('fr-FR', {
+    const lang = i18n.language?.substring(0, 2) || 'fr';
+    const localeMap = { en: 'en-US', fr: 'fr-FR', es: 'es-ES' };
+    return date.toLocaleDateString(localeMap[lang] || 'fr-FR', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -226,6 +235,9 @@ export default function BookingModal() {
     }
   };
 
+  // Wrap the calendar legend to inject t()
+  const CalendarLegendWithT = (props) => <ModalCalendarLegend {...props} t={t} />;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -258,11 +270,12 @@ export default function BookingModal() {
       check_in: toISODate(localCheckIn),
       check_out: toISODate(localCheckOut),
       message: formData.selectedPackage
-        ? `Pack : ${formData.selectedPackage}${formData.additionalMessage.trim() ? ' — ' + formData.additionalMessage.trim() : ''}`
+        ? `${t('booking.packPrefix', { pack: formData.selectedPackage })}${formData.additionalMessage.trim() ? ' — ' + formData.additionalMessage.trim() : ''}`
         : formData.additionalMessage.trim(),
     };
 
     try {
+      await getCsrfCookie();
       await api.post('/reservations', payload);
       setSuccess(true);
       // Auto close after 3 seconds
@@ -274,7 +287,7 @@ export default function BookingModal() {
       if (err.response?.status === 422 && err.response?.data?.errors) {
         setErrors(err.response.data.errors);
       } else {
-        const msg = err.response?.data?.message || 'Une erreur est survenue lors de la soumission.';
+        const msg = err.response?.data?.message || t('booking.submitError');
         setError(msg);
       }
     } finally {
@@ -320,9 +333,9 @@ export default function BookingModal() {
                   transition={{ delay: 0.2 }}
                   className="space-y-3"
                 >
-                  <h3 className="font-headline-md text-2xl text-primary font-bold">Demande Envoyée !</h3>
+                  <h3 className="font-headline-md text-2xl text-primary font-bold">{t('booking.requestSent')}</h3>
                   <p className="text-on-surface-variant/80 text-sm max-w-md mx-auto leading-relaxed">
-                    Votre demande a été envoyée avec succès. Notre équipe vous contactera très prochainement par téléphone ou e-mail pour finaliser et confirmer votre réservation.
+                    {t('booking.requestSentDesc')}
                   </p>
                 </motion.div>
               </div>
@@ -332,11 +345,11 @@ export default function BookingModal() {
                 {/* Header */}
                 <div className="flex justify-between items-start border-b border-outline-variant/30 pb-4">
                   <div>
-                    <h3 className="font-headline-md text-xl text-primary font-bold">Finaliser la Demande</h3>
+                    <h3 className="font-headline-md text-xl text-primary font-bold">{t('booking.finalizeRequest')}</h3>
                     <p className="text-xs text-on-surface-variant/85 mt-1 font-semibold">
                       {localCheckIn && localCheckOut
-                        ? <>Séjour du {formatDateFrench(localCheckIn)} au {formatDateFrench(localCheckOut)}{initialData?.guests ? ` • ${initialData.guests}` : ''}</>
-                        : <>Veuillez sélectionner vos dates ci-dessous{initialData?.guests ? ` • ${initialData.guests}` : ''}</>}
+                        ? <>{t('booking.stayFrom', { checkIn: formatDateLocale(localCheckIn), checkOut: formatDateLocale(localCheckOut) })}{initialData?.guests ? ` • ${initialData.guests}` : ''}</>
+                        : <>{t('booking.selectDatesBelow')}{initialData?.guests ? ` • ${initialData.guests}` : ''}</>}
                     </p>
                   </div>
                   <button
@@ -370,18 +383,18 @@ export default function BookingModal() {
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <Calendar size={11} strokeWidth={2.5} className="text-[#E76F51]" />
                         <label className="text-[10px] font-bold text-[#E76F51] uppercase tracking-wider">
-                          Date d'arrivée
+                          {t('booking.arrivalDate')}
                         </label>
                         {datesLoading && (
                           <span className="ml-auto flex items-center gap-1 text-[8px] font-semibold text-slate-400 uppercase tracking-wider">
                             <span className="w-1 h-1 rounded-full bg-[#E76F51] animate-pulse" />
-                            Chargement
+                            {t('booking.loading')}
                           </span>
                         )}
                       </div>
                       
                       <ModalDateInput
-                        value={formatDateFrench(localCheckIn)}
+                        value={formatDateLocale(localCheckIn)}
                         onClick={() => {
                           if (!loading) {
                             setIsCheckInOpen(!isCheckInOpen);
@@ -389,7 +402,7 @@ export default function BookingModal() {
                             setSelectOpen(false);
                           }
                         }}
-                        placeholder="Choisir une date"
+                        placeholder={t('booking.chooseDate')}
                       />
 
                       <AnimatePresence>
@@ -418,9 +431,9 @@ export default function BookingModal() {
                                 excludeDates={bookedDates}
                                 minDate={startOfDay(new Date())}
                                 inline
-                                locale={fr}
+                                locale={currentLocale}
                                 calendarClassName="azul-dp-popper"
-                                calendarContainer={ModalCalendarLegend}
+                                calendarContainer={CalendarLegendWithT}
                               />
                             </motion.div>
                           </>
@@ -440,12 +453,12 @@ export default function BookingModal() {
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <Calendar size={11} strokeWidth={2.5} className="text-[#E76F51]" />
                         <label className="text-[10px] font-bold text-[#E76F51] uppercase tracking-wider">
-                          Date de départ
+                          {t('booking.departureDate')}
                         </label>
                       </div>
 
                       <ModalDateInput
-                        value={formatDateFrench(localCheckOut)}
+                        value={formatDateLocale(localCheckOut)}
                         onClick={() => {
                           if (!loading) {
                             setIsCheckOutOpen(!isCheckOutOpen);
@@ -453,7 +466,7 @@ export default function BookingModal() {
                             setSelectOpen(false);
                           }
                         }}
-                        placeholder="Choisir une date"
+                        placeholder={t('booking.chooseDate')}
                       />
 
                       <AnimatePresence>
@@ -482,9 +495,9 @@ export default function BookingModal() {
                                     : startOfDay(new Date())
                                 }
                                 inline
-                                locale={fr}
+                                locale={currentLocale}
                                 calendarClassName="azul-dp-popper"
-                                calendarContainer={ModalCalendarLegend}
+                                calendarContainer={CalendarLegendWithT}
                               />
                             </motion.div>
                           </>
@@ -501,7 +514,7 @@ export default function BookingModal() {
                   </div>
 
                   <FloatingInput
-                    label="Nom Complet"
+                    label={t('booking.fullName')}
                     id="booking_name"
                     name="name"
                     value={formData.name}
@@ -513,7 +526,7 @@ export default function BookingModal() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FloatingInput
-                      label="Adresse Email"
+                      label={t('booking.emailAddress')}
                       id="booking_email"
                       name="email"
                       type="email"
@@ -524,7 +537,7 @@ export default function BookingModal() {
                       error={errors.email}
                     />
                     <FloatingInput
-                      label="Numéro de Téléphone"
+                      label={t('booking.phoneNumber')}
                       id="booking_phone"
                       name="phone"
                       type="tel"
@@ -539,7 +552,7 @@ export default function BookingModal() {
                   {/* Custom Premium Select Dropdown */}
                   <div className="relative space-y-1.5">
                     <label className="text-[10px] font-bold text-[#E76F51] uppercase tracking-wider block">
-                      Type de Service Souhaité
+                      {t('booking.serviceType')}
                     </label>
                     <div className="relative">
                       <button
@@ -555,7 +568,7 @@ export default function BookingModal() {
                         className="w-full bg-white/40 border border-outline-variant/30 rounded-xl py-3.5 px-4 text-sm text-left font-medium text-slate-800 outline-hidden transition-all duration-200 focus:border-[#E76F51] focus:bg-white focus:ring-2 focus:ring-[#E76F51]/10 flex items-center justify-between cursor-pointer"
                       >
                         <span>
-                          {packages.find(p => p.value === formData.selectedPackage)?.label || 'Choisir un pack'}
+                          {packages.find(p => p.value === formData.selectedPackage)?.label || t('booking.choosePack')}
                         </span>
                         <motion.div
                           animate={{ rotate: selectOpen ? 180 : 0 }}
@@ -613,7 +626,7 @@ export default function BookingModal() {
                   </div>
 
                   <FloatingTextarea
-                    label="Message / Remarques (Optionnel)"
+                    label={t('booking.messageOptional')}
                     id="booking_message"
                     name="additionalMessage"
                     value={formData.additionalMessage}
@@ -633,12 +646,12 @@ export default function BookingModal() {
                       {loading ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
-                          <span>Traitement en cours...</span>
+                          <span>{t('booking.processing')}</span>
                         </>
                       ) : !localCheckIn || !localCheckOut ? (
-                        <span>Sélectionnez vos dates</span>
+                        <span>{t('booking.selectYourDates')}</span>
                       ) : (
-                        <span>Envoyer la demande</span>
+                        <span>{t('booking.sendRequest')}</span>
                       )}
                     </motion.button>
                   </div>

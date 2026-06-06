@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function AboutUs() {
+  const { t } = useTranslation();
   return (
     <main>
       {/* Hero Section */}
@@ -15,10 +17,10 @@ export default function AboutUs() {
         </div>
         <div className="relative z-10 text-center px-margin-mobile md:px-margin-desktop max-w-4xl mx-auto flex flex-col items-center">
           <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-primary mb-6 drop-shadow-md">
-            Where Moroccan Tradition Meets the Ocean's Rhythm
+            {t('about.heroTitle')}
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl bg-surface/80 p-6 rounded-lg backdrop-blur-sm">
-            Azul Surf Mirleft is more than a destination; it's a sanctuary. We blend the raw beauty of the Atlantic coast with refined luxury, offering a space to decompress, connect, and ride the waves of profound tranquility.
+            {t('about.heroSubtitle')}
           </p>
         </div>
       </section>
@@ -27,15 +29,15 @@ export default function AboutUs() {
       <section className="py-section-padding px-margin-mobile md:px-margin-desktop bg-surface-container-lowest">
         <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
           <div className="md:col-span-5 md:col-start-2">
-            <span className="font-label-md text-label-md text-primary tracking-widest uppercase mb-4 block">Our Origins</span>
+            <span className="font-label-md text-label-md text-primary tracking-widest uppercase mb-4 block">{t('about.originsLabel')}</span>
             <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-6">
-              A Vision Born from the Salt Air
+              {t('about.originsTitle')}
             </h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-6">
-              The story of Azul begins with a deep reverence for the untamed beauty of Mirleft. Seeking an escape from the relentless pace of modern life, our founders discovered a rare intersection here: consistent, world-class surf breaks framed by towering ochre cliffs, all steeped in the warm, unhurried culture of southern Morocco.
+              {t('about.originsP1')}
             </p>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              We envisioned a retreat that didn't just accommodate surfers, but elevated the entire experience. A place where minimalist design principles allow the natural surroundings to speak, and where every detail—from the thread count of the linens to the locally sourced ingredients in our kitchen—reflects a commitment to mindful luxury.
+              {t('about.originsP2')}
             </p>
           </div>
           <div className="md:col-span-5 md:col-start-8 relative mt-12 md:mt-0">

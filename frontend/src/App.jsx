@@ -19,6 +19,7 @@ import AboutUs from './pages/AboutUs';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
+import NotFound from './pages/NotFound';
 
 // Admin pages
 import Dashboard from './pages/Dashboard';
@@ -29,14 +30,7 @@ import AdminGallery from './pages/admin/AdminGallery';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminMessages from './pages/admin/AdminMessages';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
-
-// Placeholder admin pages
-const AdminPlaceholder = ({ name }) => (
-  <div className="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-xs space-y-4">
-    <h3 className="text-xl font-bold text-slate-900">{name} Management</h3>
-    <p className="text-sm text-slate-550">This control panel is scaffolded and ready for your content CRUD views.</p>
-  </div>
-);
+import AdminPlaceholder from './pages/admin/AdminPlaceholder';
 
 // Inner component so useLocation can be called inside <Router>
 function AppContent() {
@@ -76,10 +70,10 @@ function AppContent() {
         <Route path="/admin/gallery" element={<AdminProtectedRoute><AdminLayout><AdminGallery /></AdminLayout></AdminProtectedRoute>} />
         <Route path="/admin/reviews" element={<AdminProtectedRoute><AdminLayout><AdminReviews /></AdminLayout></AdminProtectedRoute>} />
         <Route path="/admin/contacts" element={<AdminProtectedRoute><AdminLayout><AdminMessages /></AdminLayout></AdminProtectedRoute>} />
-        <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminPlaceholder name="System Settings" /></AdminLayout></AdminProtectedRoute>} />
+        <Route path="/admin/settings" element={<AdminProtectedRoute><AdminLayout><AdminPlaceholder title="System Settings" /></AdminLayout></AdminProtectedRoute>} />
         
         {/* Catch all 404 */}
-        <Route path="*" element={<MainLayout><div className="py-20 text-center text-slate-500">Page not found.</div></MainLayout>} />
+        <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
       </Routes>
 
       {/* Client-only widgets — hidden on all /admin routes */}

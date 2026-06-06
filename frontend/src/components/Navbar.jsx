@@ -1,11 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useBooking } from '../context/BookingContext';
 
+// ── Language Switcher sub-component ──────────────────────────────────────────
+const LanguageSwitcher = ({ className = '' }) => {
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language?.substring(0, 2); // normalize "en-US" → "en"
+
+  const languages = [
+    { code: 'en', label: 'EN' },
+    { code: 'fr', label: 'FR' },
+    { code: 'es', label: 'ES' },
+  ];
+
+  return (
+    <div className={`flex items-center gap-2 text-on-surface-variant text-[11px] font-semibold tracking-wider ${className}`}>
+      {languages.map((lang, idx) => (
+        <React.Fragment key={lang.code}>
+          {idx > 0 && <span className="opacity-20">|</span>}
+          <button
+            onClick={() => i18n.changeLanguage(lang.code)}
+            className={`transition-all duration-200 cursor-pointer ${
+              currentLang === lang.code
+                ? 'text-primary font-bold opacity-100'
+                : 'opacity-70 hover:text-primary hover:opacity-100'
+            }`}
+            aria-label={`Switch to ${lang.label}`}
+          >
+            {lang.label}
+          </button>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
+// ── Main Navbar ──────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { openBookingModal } = useBooking();
+  const { t } = useTranslation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredPath, setHoveredPath] = useState(null);
@@ -25,13 +61,13 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { path: '/gallery', label: 'Galerie' },
-    { path: '/surf-packages', label: 'Surf Packages' },
-    { path: '/surf-camp', label: 'Surf Camp' },
-    { path: '/surf-school', label: 'Surf School' },
-    { path: '/surf-guiding', label: 'Surf Guiding' },
-    { path: '/about', label: 'About Us' },
-    { path: '/contact', label: 'Contact Us' }
+    { path: '/gallery', label: t('nav.gallery') },
+    { path: '/surf-packages', label: t('nav.surfPackages') },
+    { path: '/surf-camp', label: t('nav.surfCamp') },
+    { path: '/surf-school', label: t('nav.surfSchool') },
+    { path: '/surf-guiding', label: t('nav.surfGuiding') },
+    { path: '/about', label: t('nav.aboutUs') },
+    { path: '/contact', label: t('nav.contactUs') }
   ];
 
   // Mobile menu slide and stagger variants
@@ -121,13 +157,7 @@ export default function Navbar() {
 
           {/* Actions (Language Switcher & CTA Button) */}
           <div className="hidden lg:flex items-center gap-6">
-            <div className="flex items-center gap-2 text-on-surface-variant text-[11px] font-semibold tracking-wider">
-              <span className="text-primary cursor-pointer font-bold hover:opacity-100 transition-opacity">EN</span>
-              <span className="opacity-20">|</span>
-              <span className="hover:text-primary cursor-pointer opacity-70 hover:opacity-100 transition-all">FR</span>
-              <span className="opacity-20">|</span>
-              <span className="hover:text-primary cursor-pointer opacity-70 hover:opacity-100 transition-all">AR</span>
-            </div>
+            <LanguageSwitcher />
 
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -135,7 +165,7 @@ export default function Navbar() {
               onClick={() => openBookingModal()}
               className="bg-[#E76F51] text-white px-7 py-2.5 rounded-full font-label-md text-[13px] uppercase tracking-widest hover:bg-[#d46247] transition-colors shadow-md shadow-[#E76F51]/20 hover:shadow-lg hover:shadow-[#E76F51]/30 cursor-pointer"
             >
-              Réserver
+              {t('nav.bookNow')}
             </motion.button>
           </div>
 
@@ -149,7 +179,7 @@ export default function Navbar() {
               }}
               className="bg-[#E76F51] text-white px-5 py-2 rounded-full font-label-md text-xs uppercase tracking-widest hover:bg-[#d46247] shadow-sm cursor-pointer"
             >
-              Réserver
+              {t('nav.bookNow')}
             </motion.button>
 
             <button 
@@ -219,15 +249,9 @@ export default function Navbar() {
 
               {/* Footer info / Language switch inside drawer */}
               <div className="pt-6 border-t border-[#e4e2e1]/30 space-y-4">
-                <div className="flex gap-4 text-xs font-semibold tracking-wider text-on-surface-variant justify-center">
-                  <span className="text-primary font-bold cursor-pointer">EN</span>
-                  <span className="opacity-20">|</span>
-                  <span className="hover:text-primary cursor-pointer transition-colors">FR</span>
-                  <span className="opacity-20">|</span>
-                  <span className="hover:text-primary cursor-pointer transition-colors">AR</span>
-                </div>
+                <LanguageSwitcher className="justify-center text-xs" />
                 <p className="text-center text-[10px] text-on-surface-variant/60 tracking-wider">
-                  HIGH-END COASTAL TRANQUILITY
+                  {t('nav.tagline')}
                 </p>
               </div>
             </motion.div>
