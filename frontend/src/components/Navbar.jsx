@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useBooking } from '../context/BookingContext';
 
 // ── Language Switcher sub-component ──────────────────────────────────────────
-const LanguageSwitcher = ({ className = '' }) => {
+// mode="dropdown" (default, desktop) — animated dropdown menu
+// mode="inline"  (mobile drawer)    — flat row of language buttons
+const LanguageSwitcher = ({ className = '', mode = 'dropdown' }) => {
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.substring(0, 2); // normalize "en-US" → "en"
+
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
   const languages = [
     { code: 'en', label: 'EN' },
@@ -16,24 +21,89 @@ const LanguageSwitcher = ({ className = '' }) => {
     { code: 'es', label: 'ES' },
   ];
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (mode !== 'dropdown') return;
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [mode]);
+
+  // ── Inline (mobile) variant ──
+  if (mode === 'inline') {
+    return (
+      <div className={`flex items-center gap-2 text-on-surface-variant text-[11px] font-semibold tracking-wider ${className}`}>
+        {languages.map((lang, idx) => (
+          <React.Fragment key={lang.code}>
+            {idx > 0 && <span className="opacity-20">|</span>}
+            <button
+              onClick={() => i18n.changeLanguage(lang.code)}
+              className={`transition-all duration-200 cursor-pointer ${
+                currentLang === lang.code
+                  ? 'text-primary font-bold opacity-100'
+                  : 'opacity-70 hover:text-primary hover:opacity-100'
+              }`}
+              aria-label={`Switch to ${lang.label}`}
+            >
+              {lang.label}
+            </button>
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Dropdown (desktop) variant ──
+  const currentLabel = languages.find((l) => l.code === currentLang)?.label || 'EN';
+
   return (
-    <div className={`flex items-center gap-2 text-on-surface-variant text-[11px] font-semibold tracking-wider ${className}`}>
-      {languages.map((lang, idx) => (
-        <React.Fragment key={lang.code}>
-          {idx > 0 && <span className="opacity-20">|</span>}
+    <div ref={wrapperRef} className={`relative ${className}`}>
+      {/* Trigger button */}
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex items-center gap-1.5 text-on-surface-variant font-label-md text-[13px] uppercase tracking-widest cursor-pointer transition-colors duration-300 hover:text-primary"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-label="Select language"
+      >
+        {currentLabel}
+        <ChevronDown
+          size={14}
+          className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+        />
+      </button>
+
+      {/* Dropdown menu */}
+      <div
+        className={`absolute top-full mt-2 right-0 bg-white shadow-lg rounded-md overflow-hidden min-w-[80px] z-50
+          transition-all duration-300 ease-in-out
+          ${isOpen
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}
+      >
+        {languages.map((lang) => (
           <button
-            onClick={() => i18n.changeLanguage(lang.code)}
-            className={`transition-all duration-200 cursor-pointer ${
-              currentLang === lang.code
-                ? 'text-primary font-bold opacity-100'
-                : 'opacity-70 hover:text-primary hover:opacity-100'
-            }`}
-            aria-label={`Switch to ${lang.label}`}
+            key={lang.code}
+            onClick={() => {
+              i18n.changeLanguage(lang.code);
+              setIsOpen(false);
+            }}
+            className={`block w-full text-left px-4 py-2.5 text-[13px] font-label-md uppercase tracking-widest
+              transition-colors duration-200 cursor-pointer
+              ${currentLang === lang.code
+                ? 'bg-primary/10 text-primary font-bold'
+                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
+              }`}
           >
             {lang.label}
           </button>
-        </React.Fragment>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
@@ -114,17 +184,20 @@ export default function Navbar() {
             : 'bg-transparent border-transparent py-5'
         }`}
       >
-        <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-1 max-w-container-max mx-auto">
-          {/* Logo / Brand Name */}
-          <Link 
-            className="flex items-center space-x-1.5 font-headline-md text-xl md:text-2xl text-primary transition-opacity duration-300 hover:opacity-90" 
-            to="/"
-          >
-            <span className="font-bold tracking-[0.25em]">AZUL</span> 
-            <span className="font-light tracking-[0.15em] opacity-80 text-[0.8em]">SURF</span>
-          </Link>
+        <div className="flex justify-between items-center w-full px-6 py-4 max-w-container-max mx-auto">
 
-          {/* Desktop Navigation Links */}
+          {/* ── Group 1: Logo ── */}
+          <div className="flex-shrink-0">
+            <Link 
+              className="flex items-center space-x-1.5 font-headline-md text-xl md:text-2xl text-primary transition-opacity duration-300 hover:opacity-90" 
+              to="/"
+            >
+              <span className="font-bold tracking-[0.25em]">AZUL</span> 
+              <span className="font-light tracking-[0.15em] opacity-80 text-[0.8em]">SURF</span>
+            </Link>
+          </div>
+
+          {/* ── Group 2: Desktop Navigation Links ── */}
           <div className="hidden lg:flex items-center gap-x-8">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
@@ -155,21 +228,21 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Actions (Language Switcher & CTA Button) */}
+          {/* ── Group 3: Actions (Language Switcher + Book Now) ── */}
           <div className="hidden lg:flex items-center gap-6">
-            <LanguageSwitcher />
+            <LanguageSwitcher mode="dropdown" />
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => openBookingModal()}
-              className="bg-[#E76F51] text-white px-7 py-2.5 rounded-full font-label-md text-[13px] uppercase tracking-widest hover:bg-[#d46247] transition-colors shadow-md shadow-[#E76F51]/20 hover:shadow-lg hover:shadow-[#E76F51]/30 cursor-pointer"
+              className="bg-[#E76F51] text-white px-7 py-2.5 rounded-full font-label-md text-[13px] uppercase tracking-widest hover:bg-[#d46247] transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg shadow-[#E76F51]/20 hover:shadow-[#E76F51]/30 cursor-pointer"
             >
               {t('nav.bookNow')}
             </motion.button>
           </div>
 
-          {/* Mobile Actions: Menu toggle */}
+          {/* ── Mobile Actions: Menu toggle ── */}
           <div className="flex lg:hidden items-center gap-4">
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -234,7 +307,7 @@ export default function Navbar() {
                       to={link.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={({ isActive }) => 
-                        `font-label-md text-base uppercase tracking-widest block transition-colors ${
+                        `font-label-md text-base uppercase tracking-widest block transition-colors duration-300 ${
                           isActive 
                             ? 'text-primary font-semibold border-l-2 border-primary pl-3' 
                             : 'text-on-surface-variant hover:text-primary pl-3'
@@ -249,7 +322,7 @@ export default function Navbar() {
 
               {/* Footer info / Language switch inside drawer */}
               <div className="pt-6 border-t border-[#e4e2e1]/30 space-y-4">
-                <LanguageSwitcher className="justify-center text-xs" />
+                <LanguageSwitcher mode="inline" className="justify-center text-xs" />
                 <p className="text-center text-[10px] text-on-surface-variant/60 tracking-wider">
                   {t('nav.tagline')}
                 </p>

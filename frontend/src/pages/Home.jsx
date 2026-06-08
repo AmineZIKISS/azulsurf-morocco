@@ -141,25 +141,27 @@ export default function Home() {
           Layout: full-bleed image → gradient overlay → text (centered)
           The booking card lives *below* the hero, not overlaid on top.
       ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full" style={{ minHeight: '100vh' }}>
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDEOiAC1_-GV_CDCXSKQw8kuGUQ-wWpB9FgB-bHnI7HHM82-iiRKDp3MIZSa8huIPSnaXZXuiDRGgZXD4ppaO4SOkgILe0IDhiu5NsBYCGlqJ65a3SIiEbH4gVC-uyOrEH-FYdLBMmCKVu43y_QRY4sIxxJbbPvGe7YO4NxE60gDESnMPFpeCOL-3hpUFCrr3k88L3q98k6LIYs4hteJGNUv5UMHkTbTTl3Fi2PWFgxNVs-veOALyMeTr0ngZLzPLzyX5KLlDdNUag')",
-          }}
+      <section className="relative w-full overflow-hidden min-h-[100dvh]">
+        {/* Background video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
         >
-          {/* Gradient overlay: dark top-to-bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-black/60" />
-        </div>
+          <source src="/azul-surf-bg.mp4" type="video/mp4" />
+        </video>
 
-        {/* Hero text — vertically centred, strictly above the booking card */}
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+
+        {/* Hero text — shifted upwards to avoid overlap with video's built-in text */}
         <motion.div
           variants={heroTextVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-24 pb-40"
-          style={{ minHeight: '80vh' }}
+          className="relative z-20 flex flex-col items-center justify-start text-center px-4 md:px-8 pt-32 md:pt-48 pb-40"
         >
           {/* Eyebrow label */}
           <motion.span
@@ -169,10 +171,10 @@ export default function Home() {
             {t('home.heroBadge')}
           </motion.span>
 
-          {/* Main headline — Serif, large, white, clean */}
+          {/* Main headline — Serif, responsive sizing, clean */}
           <motion.h1
             variants={fadeUpVariants}
-            className="text-white font-headline-lg text-4xl md:text-[58px] md:leading-[1.12] tracking-tight font-bold max-w-3xl mb-5"
+            className="text-white font-headline-lg text-3xl md:text-5xl lg:text-6xl leading-tight tracking-tight font-bold max-w-4xl mb-6"
           >
             {t('home.heroTitle').split('\n').map((line, i) => (
               <React.Fragment key={i}>{i > 0 && <br className="hidden md:inline" />}{line}</React.Fragment>
@@ -182,7 +184,7 @@ export default function Home() {
           {/* Subtitle */}
           <motion.p
             variants={fadeUpVariants}
-            className="text-white/80 text-base md:text-lg font-body-lg max-w-xl mx-auto"
+            className="text-white/80 text-base md:text-lg lg:text-xl font-body-lg max-w-2xl mx-auto"
           >
             {t('home.heroSubtitle')}
           </motion.p>
